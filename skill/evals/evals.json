@@ -1,0 +1,40 @@
+{
+  "skill_name": "yes-subagents",
+  "evals": [
+    {
+      "id": 1,
+      "eval_name": "draft-review-after-brainstorm",
+      "prompt": "刚刚和团队头脑风暴完，我趁热写了一份草案。项目还是 /Users/teatao/Projects/skill_oh-my-subagent，我打算让 skill 能够自动发现什么时候该用子代理，然后主动把任务分派出去，而不是等我一条条说。你先看看这份草案有没有明显问题，有的话多轮迭代到靠谱为止。",
+      "expected_output": "应该识别出这是头脑风暴后的草案审查场景，主动派遣 critic-strict 进行多轮 adversarial review，并给出带优先级的缺陷清单与迭代结论。",
+      "files": []
+    },
+    {
+      "id": 2,
+      "eval_name": "vague-implementation-request",
+      "prompt": "我想在 /Users/teatao/Projects/skill_oh-my-subagent 里加一个新能力：让 skill 自己判断要不要拆分子代理。你帮我落地一下？我不知道具体该怎么拆步骤。",
+      "expected_output": "应该识别出这是一个需要拆分的多步骤实现任务，主动使用子代理推进，并在关键里程碑派遣 critic-gate 检查后再继续，最终产出可交付结果。",
+      "files": []
+    },
+    {
+      "id": 3,
+      "eval_name": "vague-quality-concern",
+      "prompt": "我看 /Users/teatao/Projects/skill_oh-my-subagent 这个项目最近有点失控，文件和逻辑都越来越乱。你能不能整体看看情况，给我一份正式的结论？",
+      "expected_output": "应该识别出这是质量审计与熵减场景，主动派遣 quality-auditor 生成报告，并派遣 critic-strict 审查报告，保留最终质量报告。",
+      "files": []
+    },
+    {
+      "id": 4,
+      "eval_name": "vague-debug-request",
+      "prompt": "我在 /Users/teatao/Projects/skill_oh-my-subagent 这边跑一个脚本老报错，大概意思是说输出文件字段不对。你帮我看看是哪里的问题，告诉我怎么修。",
+      "expected_output": "应该识别出这是问题定位场景，主动派遣 debugger 调查，读取相关文件和错误上下文，输出根因报告与具体修复位置。",
+      "files": []
+    },
+    {
+      "id": 5,
+      "eval_name": "should-not-trigger-simple-task",
+      "prompt": "帮我写一段 Python，把列表按字符串长度排序，最长的放前面。",
+      "expected_output": "这是一个简单的一次性编码任务，不应该派遣子代理，应该直接给出代码。",
+      "files": []
+    }
+  ]
+}
