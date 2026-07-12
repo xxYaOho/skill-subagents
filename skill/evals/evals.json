@@ -3,37 +3,37 @@
   "evals": [
     {
       "id": 1,
-      "eval_name": "draft-review-after-brainstorm",
-      "prompt": "刚刚和团队头脑风暴完，我趁热写了一份草案。项目还是 /Users/teatao/Projects/skill_oh-my-subagent，我打算让 skill 能够自动发现什么时候该用子代理，然后主动把任务分派出去，而不是等我一条条说。你先看看这份草案有没有明显问题，有的话多轮迭代到靠谱为止。",
-      "expected_output": "应该识别出这是头脑风暴后的草案审查场景，主动派遣 critic-strict 进行多轮 adversarial review，并给出带优先级的缺陷清单与迭代结论。",
+      "eval_name": "cli-quality-audit",
+      "prompt": "cli_dotlink 是我之前做的项目，没有 CI、没有 lint，代码量也不小了。帮我做一次完整的质量审计，给我一份正式结论。项目在 /Users/teatao/Projects/cli_dotlink",
+      "expected_output": "识别为熵减场景，派遣 quality-auditor 审计 → 派遣 critic-strict 复核报告 → PASS 后停止",
       "files": []
     },
     {
       "id": 2,
-      "eval_name": "vague-implementation-request",
-      "prompt": "我想在 /Users/teatao/Projects/skill_oh-my-subagent 里加一个新能力：让 skill 自己判断要不要拆分子代理。你帮我落地一下？我不知道具体该怎么拆步骤。",
-      "expected_output": "应该识别出这是一个需要拆分的多步骤实现任务，主动使用子代理推进，并在关键里程碑派遣 critic-gate 检查后再继续，最终产出可交付结果。",
+      "eval_name": "cli-plan-review",
+      "prompt": "cli_dotlink 的 docs/plans/ 和 docs/superpowers/specs/ 里有一些后续计划和设计文档。你帮我审查一下这些方案有没有漏洞或设计问题。项目在 /Users/teatao/Projects/cli_dotlink",
+      "expected_output": "识别为讨论场景，派遣 critic-strict 审查设计方案，迭代到 PASS 后汇报",
       "files": []
     },
     {
       "id": 3,
-      "eval_name": "vague-quality-concern",
-      "prompt": "我看 /Users/teatao/Projects/skill_oh-my-subagent 这个项目最近有点失控，文件和逻辑都越来越乱。你能不能整体看看情况，给我一份正式的结论？",
-      "expected_output": "应该识别出这是质量审计与熵减场景，主动派遣 quality-auditor 生成报告，并派遣 critic-strict 审查报告，保留最终质量报告。",
+      "eval_name": "cli-debug-rough-ok",
+      "prompt": "cli_dotlink 的 index.mjs 里有一段处理 empty module 的逻辑，注释写了 'this is rough but ok'，我怀疑那里有潜在问题。你帮我深入排查一下那段代码，看看有没有 bug，有的话告诉我怎么修。项目在 /Users/teatao/Projects/cli_dotlink",
+      "expected_output": "识别为排查场景，派遣 debugger 分析代码路径，给出根因和修复建议",
       "files": []
     },
     {
       "id": 4,
-      "eval_name": "vague-debug-request",
-      "prompt": "我在 /Users/teatao/Projects/skill_oh-my-subagent 这边跑一个脚本老报错，大概意思是说输出文件字段不对。你帮我看看是哪里的问题，告诉我怎么修。",
-      "expected_output": "应该识别出这是问题定位场景，主动派遣 debugger 调查，读取相关文件和错误上下文，输出根因报告与具体修复位置。",
+      "eval_name": "cli-export-json",
+      "prompt": "我想给 cli_dotlink 加一个功能：支持导出当前所有 link 的状态为 JSON 格式。帮我规划并给出一份可执行方案（只输出方案，不要改任何文件）。项目在 /Users/teatao/Projects/cli_dotlink",
+      "expected_output": "识别为行动场景，先 Plan → critic-strict 审查 → PASS 后汇报方案",
       "files": []
     },
     {
       "id": 5,
-      "eval_name": "should-not-trigger-simple-task",
-      "prompt": "帮我写一段 Python，把列表按字符串长度排序，最长的放前面。",
-      "expected_output": "这是一个简单的一次性编码任务，不应该派遣子代理，应该直接给出代码。",
+      "eval_name": "cli-deps-list",
+      "prompt": "cli_dotlink 的 package.json 里有哪些依赖？把名称和版本列一下。项目在 /Users/teatao/Projects/cli_dotlink",
+      "expected_output": "简单一次性请求，不应派遣子代理，直接回答",
       "files": []
     }
   ]
