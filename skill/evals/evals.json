@@ -12,14 +12,14 @@
       "id": 2,
       "eval_name": "cli-plan-review",
       "prompt": "cli_dotlink 的 docs/plans/ 和 docs/superpowers/specs/ 里有一些后续计划和设计文档。你帮我审查一下这些方案有没有漏洞或设计问题。项目在 /Users/teatao/Projects/cli_dotlink",
-      "expected_output": "识别为讨论场景，派遣 critic-strict 审查设计方案，迭代到 PASS 后汇报",
+      "expected_output": "识别为讨论场景，派遣 critic-strict 审查设计方案，运行飞轮直到 PASS 后汇报",
       "files": []
     },
     {
       "id": 3,
       "eval_name": "cli-debug-rough-ok",
       "prompt": "cli_dotlink 的 index.mjs 里有一段处理 empty module 的逻辑，注释写了 'this is rough but ok'，我怀疑那里有潜在问题。你帮我深入排查一下那段代码，看看有没有 bug，有的话告诉我怎么修。项目在 /Users/teatao/Projects/cli_dotlink",
-      "expected_output": "识别为排查场景，派遣 debugger 分析代码路径，给出根因和修复建议",
+      "expected_output": "识别为单个排查工作单元，单体派遣 debugger，不使用普通并行或蜂群；Debugger 给出根因和修复建议",
       "files": []
     },
     {
@@ -34,6 +34,83 @@
       "eval_name": "cli-deps-list",
       "prompt": "cli_dotlink 的 package.json 里有哪些依赖？把名称和版本列一下。项目在 /Users/teatao/Projects/cli_dotlink",
       "expected_output": "简单一次性请求，不应派遣子代理，直接回答",
+      "files": []
+    },
+    {
+      "id": 6,
+      "eval_name": "three-units-ordinary-parallel",
+      "prompt": "请分别整理 packages/auth、packages/cache、packages/logger 三个互不依赖模块的错误码命名。每个模块只改自己的 errors.ts，统一改为大写的 <MODULE>_<REASON> 格式，不改变错误码数值，全部完成后汇总。",
+      "expected_output": "识别为 3 个独立工作单元，采用普通并行而不是蜂群；为每个成员分配互不重叠的文件边界，并在完成后汇总",
+      "files": []
+    },
+    {
+      "id": 7,
+      "eval_name": "four-simple-units-swarm",
+      "prompt": "assets/icons 里有 add.svg、remove.svg、search.svg、close.svg 四个互不依赖的图标。分别删除固定 fill 属性并运行同一套 SVG 校验，帮我并行处理。",
+      "expected_output": "识别为 4 个简单、同质、独立工作单元，考虑蜂群调度；优先派遣 4 个 swarm 成员，每个成员只处理一个图标文件",
+      "files": []
+    },
+    {
+      "id": 8,
+      "eval_name": "four-complex-units-coder-swarm",
+      "prompt": "workspace 里有 plugins/importer、plugins/exporter、plugins/sync、plugins/validator 四个互不依赖的插件。每个插件都要完成一次跨文件的 Node 22 兼容修复，并遵循各自目录里的约定。请并行推进。",
+      "expected_output": "识别为至少 4 个复杂且独立的工作单元，采用蜂群调度；使用 coder 作为蜂群成员，分别分配四个插件目录，边界不得重叠",
+      "files": []
+    },
+    {
+      "id": 9,
+      "eval_name": "mixed-research-swarm",
+      "prompt": "请独立核验 skill/subagents/swarm.md、coder.md、researcher.md、debugger.md、quality-auditor.md 的输入前置条件和输出状态，最后汇总它们是否一致。只做调研，不改文件。",
+      "expected_output": "识别为 5 个独立调查工作单元，调查代理可以组成蜂群；每个成员获得一个具体文件边界，完成后统一汇总结论",
+      "files": []
+    },
+    {
+      "id": 10,
+      "eval_name": "bulk-visual-direct-verification",
+      "prompt": "把后台管理页的 12 个按钮、6 个输入框和三组表格排版统一到新版视觉规范。只涉及 CSS 和组件样式，不改状态与数据逻辑。完成后用桌面和移动端截图验收。",
+      "expected_output": "改动量虽大，但结果可由真实渲染和多视口截图直接验收；按工作边界调度行动代理，不因改动量机械追加 critic-strict 或 critic-gate",
+      "files": []
+    },
+    {
+      "id": 11,
+      "eval_name": "frontend-performance-residual-risk",
+      "prompt": "优化数据表格的虚拟滚动和请求缓存。验收标准：Chrome 下加载一万行数据后连续滚动 10 秒，渲染帧耗时 p95 小于 16ms；缓存超过 30 秒必须重新请求，乱序返回不得覆盖新数据。请实现并验证。",
+      "expected_output": "先用测试、性能基准和数据一致性检查直接验证；由于涉及性能、缓存与数据正确性的隐藏风险，验证后仍应评估剩余风险并派遣 critic-gate",
+      "files": []
+    },
+    {
+      "id": 12,
+      "eval_name": "backend-direct-verification-sufficient",
+      "prompt": "修复 src/format-port.ts 的纯函数：输入超出 1 到 65535 时返回 null。验收标准已经写清，现有表驱动测试覆盖边界值、正常值和非法值，只改这个函数。",
+      "expected_output": "识别为小范围、低隐藏风险的直接任务；运行相关测试并确认充分覆盖主要风险后停止，不为流程完整机械追加 Critic",
+      "files": []
+    },
+    {
+      "id": 13,
+      "eval_name": "backend-tests-insufficient",
+      "prompt": "给订单创建接口补上幂等处理。现在已有单元测试证明重复串行请求只写入一次，但没有并发测试；实现涉及数据库事务。完成后告诉我结果。",
+      "expected_output": "现有单元测试不足以覆盖并发、事务和数据一致性风险；有测试不构成自动豁免，补充直接验证后仍应派遣 critic-gate 检查剩余风险",
+      "files": []
+    },
+    {
+      "id": 14,
+      "eval_name": "swarm-batched-counting",
+      "prompt": "需要独立更新 en、zh-CN、ja、ko、fr、de 六个 locale 文件，任务完全同质。当前一次最多只能开三个子代理，其中 zh-CN 如果校验失败要重试一次。请安排执行。",
+      "expected_output": "识别为 6 个独立工作单元组成的蜂群，按 3 个并发槽位分两批；分批和 zh-CN 重试不增加成员计数，仍是 6 成员蜂群",
+      "files": []
+    },
+    {
+      "id": 15,
+      "eval_name": "strict-report-branch",
+      "prompt": "researcher 已完成一份关于是否迁移到新鉴权服务的调研报告，这份结论会直接决定下季度架构计划。请复核报告是否可信，不做实现。",
+      "expected_output": "派遣 critic-strict 按报告或调研结论分支检查证据来源、推理链和结论可信度；不把多阶段计划的里程碑要求套用到报告",
+      "files": []
+    },
+    {
+      "id": 16,
+      "eval_name": "gate-direct-task-blocked",
+      "prompt": "我没有方案文档，你直接把服务端缓存改得更稳定一些，改完后帮我做门禁检查。",
+      "expected_output": "直接任务缺少明确且可验证的验收标准；不能虚构 Gate 基线，Orchestrator 从现有上下文补全仍不足时，critic-gate 应返回 BLOCKED 并请求用户确认",
       "files": []
     }
   ]
