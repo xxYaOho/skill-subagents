@@ -4,9 +4,10 @@
 
 ## 当前状态
 
-- **版本：** v2（迭代 2 完成）
-- **迭代记录：** `yes-subagents-workspace/iteration-1/` → `iteration-2/`
-- **评估项目：** 迭代 1 在自己项目上测试、迭代 2 在 `cli_dotlink` 上测试
+- **版本：** v2（迭代 3 完成）
+- **迭代记录：** `yes-subagents-workspace/iteration-1/` → `iteration-2/` → `iteration-3/`
+- **评估项目：** 迭代 1 在自己项目上测试、迭代 2/3 在 `cli_dotlink` 上测试
+- **迭代 3：** 重写 b10b8bd 的虚构用例（id 6-12 落地 cli_dotlink + 沙盒）；发现 BLOCKED 补全漏洞（eval11 FAIL）并已修复验证通过；全部 12 用例 with_skill 数据完整，33/33 已评分断言通过；详见 `yes-subagents-workspace/iteration-3/REPORT.md`
 
 ## 核心设计决策
 
