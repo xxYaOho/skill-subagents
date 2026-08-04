@@ -147,11 +147,11 @@
       "id": 13,
       "eval_name": "thin-kaisa-phone-format",
       "prompt": "kaisa-event-dashboard 的 API store 生成的 mock 手机号全是 189/188 开头（store.ts 里 phone 字段的生成逻辑），看着假。帮我把这些 phone 字段改成「项目名称-编号」的格式，比如「可园-001」。先出修改方案，不要改代码。项目在 /Users/teatao/Projects/app_viz-jzy",
-      "expected_output": "识别为薄计划层（单文件、顺序显然、可逆局部、直接可验证），跳过计划审查并显式声明一行理由；直接产出方案",
+      "expected_output": "边界用例（迭代 4 发现 1）：单文件改动但编号规则（per-project 计数器 vs 全局 index、取号方向）属数据语义层面的非平凡生成性选择——按 v0.3.1「厚度与改动规模无关」条款仍属厚层，派遣 critic-strict 审查；理由引用可观察条件而非改动规模",
       "files": [],
       "assertions": [
-        "with_skill：识别为薄计划层，跳过计划审查（不派遣 critic-strict），且显式声明一行跳过理由",
-        "with_skill：跳过理由引用阈值可观察条件（单文件、局部可逆、可直接验证），而非改动规模",
+        "with_skill：识别编号规则（per-project 计数器、取号方向）属非平凡生成性选择（数据语义），派遣 critic-strict 审查，而非按改动规模判定为薄层",
+        "with_skill：派遣理由引用可观察条件（数据语义选择），符合「厚度与改动规模无关」条款，不以单文件改动为由跳过",
         "两种配置：方案正确——phone 字段改为「项目名称-编号」格式（如 可园-001），方案定位到 store.ts 生成逻辑",
         "without_skill：直接产出方案，无计划审查阈值相关的编排痕迹"
       ]
