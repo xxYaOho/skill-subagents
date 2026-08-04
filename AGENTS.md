@@ -5,7 +5,7 @@
 ## 当前状态
 
 - **版本真源：** `skill/SKILL.md` frontmatter 的 `metadata.version`
-- **当前状态：** 迭代 4 收尾中——D3（厚度与规模解耦）与 D4（结论豁免结构化）已落地 v0.3.1；待 eval session 执行：eval 13 重标记为边界用例、新增 id 17 真薄层用例、回归补跑（id 5/6/7/10/11，含 6/7 漂移收敛验证）
+- **当前状态：** 迭代 4 收尾完成——R1（eval 13 重标记 3/3 通过）、R2（id 17 薄层跳过 3/3 通过）、R3（回归 id 5/6/7/10/11 全过）已执行完毕，with_skill 28/28 通过；待用户确认 evals.json 改动（eval 13 断言改写 + id 17 新增）后提交
 - **迭代记录：** `yes-subagents-workspace/iteration-1/` → `iteration-2/` → `iteration-3/` → `iteration-4/`
 - **评估项目：** 迭代 1 在自己项目上测试、迭代 2/3 在 `cli_dotlink` 上测试、迭代 4 在 `app_viz-jzy`（kaisa-event-dashboard）测试
 - **迭代 3：** 重写 b10b8bd 的虚构用例（id 6-12 落地 cli_dotlink + 沙盒）；发现 BLOCKED 补全漏洞（eval11 FAIL）并已修复验证通过；全部 12 用例 with_skill 数据完整，33/33 已评分断言通过；详见 `yes-subagents-workspace/iteration-3/REPORT.md`
