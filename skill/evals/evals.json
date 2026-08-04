@@ -142,6 +142,58 @@
         "with_skill：再派遣 critic-strict 按报告/调研结论分支复核（证据来源、证据-结论对应、推理链），而非 self-critique",
         "without_skill：无独立复核环节，报告自产自审或直接交付"
       ]
+    },
+    {
+      "id": 13,
+      "eval_name": "thin-kaisa-phone-format",
+      "prompt": "kaisa-event-dashboard 的 API store 生成的 mock 手机号全是 189/188 开头（store.ts 里 phone 字段的生成逻辑），看着假。帮我把这些 phone 字段改成「项目名称-编号」的格式，比如「可园-001」。先出修改方案，不要改代码。项目在 /Users/teatao/Projects/app_viz-jzy",
+      "expected_output": "识别为薄计划层（单文件、顺序显然、可逆局部、直接可验证），跳过计划审查并显式声明一行理由；直接产出方案",
+      "files": [],
+      "assertions": [
+        "with_skill：识别为薄计划层，跳过计划审查（不派遣 critic-strict），且显式声明一行跳过理由",
+        "with_skill：跳过理由引用阈值可观察条件（单文件、局部可逆、可直接验证），而非改动规模",
+        "两种配置：方案正确——phone 字段改为「项目名称-编号」格式（如 可园-001），方案定位到 store.ts 生成逻辑",
+        "without_skill：直接产出方案，无计划审查阈值相关的编排痕迹"
+      ]
+    },
+    {
+      "id": 14,
+      "eval_name": "thick-kaisa-data-source",
+      "prompt": "kaisa-event-dashboard 目前事件数据完全是服务端启动时随机 mock 生成的（store.ts 的 createStore 函数），我想让它支持从外部 API 拉取真实事件数据，同时保留 mock 模式用于开发和演示。需要兼容现有 DashboardSnapshot 接口和前端 SSE 推送（subscribe 机制）。帮我出实施计划，不要改代码。项目在 /Users/teatao/Projects/app_viz-jzy",
+      "expected_output": "识别为厚计划层（数据源抽象、切换机制、回退降级、SSE 兼容等生成性选择），派遣 critic-strict 审查计划，飞轮直到 PASS",
+      "files": [],
+      "assertions": [
+        "with_skill：识别为厚计划层，派遣 critic-strict 对实施计划做对抗性审查",
+        "with_skill：计划包含生成性选择——数据源抽象层位置、mock/真实切换机制、回退或降级策略、SSE 兼容方案，且这些选择被审查",
+        "with_skill：依据 critic-strict 的 STATUS 决定飞轮继续或停止，不是直接汇报初稿",
+        "without_skill：直接产出实施计划，无独立对抗性审查环节"
+      ]
+    },
+    {
+      "id": 15,
+      "eval_name": "thick-kaisa-virtual-incremental",
+      "prompt": "kaisa-event-dashboard 的虚拟列表目前在事件状态变更时（advanceIncomingEvent 通过 SSE 推送）会全量重建可见行，导致闪烁。我想给虚拟滚动引擎加上「增量更新」能力——只有被 SSE 事件影响的那一行才重新渲染，其他行保持不变。需要正确处理 pin 状态、段边界和滚动锚点。帮我出实施计划，不要改代码。项目在 /Users/teatao/Projects/app_viz-jzy",
+      "expected_output": "识别为厚计划层（跨虚拟引擎多模块联动、阶段间依赖顺序、回退降级），派遣 critic-strict 审查计划，飞轮直到 PASS",
+      "files": [],
+      "assertions": [
+        "with_skill：识别为厚计划层，派遣 critic-strict 对实施计划做对抗性审查",
+        "with_skill：计划覆盖虚拟引擎跨模块联动（coordinator / lifecycle / pin / scrollAnchor / segments），包含阶段间依赖顺序设计",
+        "with_skill：依据 critic-strict 的 STATUS 决定飞轮继续或停止，不是直接汇报初稿",
+        "without_skill：直接产出实施计划，无独立对抗性审查环节"
+      ]
+    },
+    {
+      "id": 16,
+      "eval_name": "deviate-kaisa-csv-to-xlsx",
+      "prompt": "（前置背景：kaisa-event-dashboard 已有一份通过审查的设计草案，内容如下——\n\n---\n## 事件数据导出功能草案（已审，PASS）\n\n### 功能概述\n支持将事件列表导出为 CSV 文件，可按项目、时间范围、严重级别筛选。\n\n### API 设计\n- GET /api/events/export?projectId=&from=&to=&severity=\n- 返回 Content-Type: text/csv，直接触发浏览器下载\n- 默认导出全部未过滤数据\n\n### 前端\n- 在 Header 组件增加「导出 CSV」按钮\n- 筛选条件使用现有 EventFilters 的状态\n- 下载文件名格式：events-{project}-{date}.csv\n---\n\n现在需要在这个草案基础上出实施计划，但有一个变更：最终产品决策要求导出格式改为 Excel (.xlsx)，同时增加导出进度提示（数据量大时前端需要展示进度条）。请出实施计划，不要改代码。项目在 /Users/teatao/Projects/app_viz-jzy",
+      "expected_output": "计划偏离已审草案（CSV→xlsx），机械触发派遣 critic-strict，无裁量空间；审查攻击维度包含与上游草案的不一致",
+      "files": [],
+      "assertions": [
+        "with_skill：识别计划偏离已审草案（CSV → xlsx 格式变更），机械触发派遣 critic-strict，无裁量跳过",
+        "with_skill：critic-strict 审查攻击维度包含与上游草案的不一致（格式变更未过审）",
+        "with_skill：不出现「偏离不大可跳过」的自行裁量结论",
+        "without_skill：直接产出实施计划，无上游草案审查依据的独立对抗性审查环节"
+      ]
     }
   ]
 }
