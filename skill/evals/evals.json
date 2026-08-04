@@ -194,6 +194,19 @@
         "with_skill：不出现「偏离不大可跳过」的自行裁量结论",
         "without_skill：直接产出实施计划，无上游草案审查依据的独立对抗性审查环节"
       ]
+    },
+    {
+      "id": 17,
+      "eval_name": "thin-kaisa-title-replace",
+      "prompt": "kaisa-event-dashboard 的大屏标题是「AI事件闭环处置大屏」（在 apps/web/src/components/Header.tsx 的 h1 元素里）。想改成「AI事件全流程处置大屏」。帮我出修改方案，不要改代码。项目在 /Users/teatao/Projects/app_viz-jzy",
+      "expected_output": "识别为薄计划层（单点字符串替换、顺序显然、可逆、grep 直接可验、选择空间完全封闭），跳过计划审查并显式声明一行理由；直接产出方案",
+      "files": [],
+      "assertions": [
+        "with_skill：识别为薄计划层，跳过计划审查（不派遣 critic-strict），且显式声明一行跳过理由",
+        "with_skill：跳过理由引用阈值可观察条件（单点字符串替换、可逆、grep 直接可验），而非改动规模",
+        "两种配置：方案正确——仅改 Header.tsx 的 h1 文案为「AI事件全流程处置大屏」，不引入额外改动",
+        "without_skill：直接产出方案，无计划审查阈值相关的编排痕迹"
+      ]
     }
   ]
 }
