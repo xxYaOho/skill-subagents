@@ -5,11 +5,11 @@
 ## 当前状态
 
 - **版本真源：** `skill/SKILL.md` frontmatter 的 `metadata.version`
-- **当前状态：** 迭代 4 进行中
-- **迭代记录：** `yes-subagents-workspace/iteration-1/` → `iteration-2/` → `iteration-3/`
-- **评估项目：** 迭代 1 在自己项目上测试、迭代 2/3 在 `cli_dotlink` 上测试
+- **当前状态：** 迭代 4 收尾中——D3（厚度与规模解耦）与 D4（结论豁免结构化）已落地 v0.3.1；待 eval session 执行：eval 13 重标记为边界用例、新增 id 17 真薄层用例、回归补跑（id 5/6/7/10/11，含 6/7 漂移收敛验证）
+- **迭代记录：** `yes-subagents-workspace/iteration-1/` → `iteration-2/` → `iteration-3/` → `iteration-4/`
+- **评估项目：** 迭代 1 在自己项目上测试、迭代 2/3 在 `cli_dotlink` 上测试、迭代 4 在 `app_viz-jzy`（kaisa-event-dashboard）测试
 - **迭代 3：** 重写 b10b8bd 的虚构用例（id 6-12 落地 cli_dotlink + 沙盒）；发现 BLOCKED 补全漏洞（eval11 FAIL）并已修复验证通过；全部 12 用例 with_skill 数据完整，33/33 已评分断言通过；详见 `yes-subagents-workspace/iteration-3/REPORT.md`
-- **迭代 4：** 基于 Sketch 插件任务真实反馈，新增「计划审查阈值」（薄计划层可跳过 critic-strict 但需显式声明理由；偏离已审草案为机械触发），v0.3.0 已落地，待评估验证
+- **迭代 4：** 基于 Sketch 插件任务真实反馈，新增「计划审查阈值」（薄计划层可跳过 critic-strict 但需显式声明理由；偏离已审草案为机械触发），v0.3.0 已落地并完成评估。厚层拦截（id 14/15）与偏离机械触发（id 16）3/3 全部通过；eval 13 的 2 个 FAIL 判定为用例前提错误（单文件改动但编号规则实为非平凡生成性选择，agent 正确触发审查且抓到 without_skill 漏掉的真实缺陷），非 skill 缺陷；详见 `yes-subagents-workspace/iteration-4/REPORT.md`
 
 ## 核心设计决策
 
