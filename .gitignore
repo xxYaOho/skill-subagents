@@ -52,3 +52,4 @@
 .agents/skills
 .mcp.json
 yes-subagents-workspace
+.playwright-mcp
