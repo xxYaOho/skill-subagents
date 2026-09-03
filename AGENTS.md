@@ -5,9 +5,9 @@
 ## 当前状态
 
 - **版本真源：** `skill/SKILL.md` frontmatter 的 `metadata.version`
-- **当前状态：** 迭代 4 收尾完成——R1（eval 13 重标记 3/3 通过）、R2（id 17 薄层跳过 3/3 通过）、R3（回归 id 5/6/7/10/11 全过）已执行完毕，with_skill 28/28 通过；待用户确认 evals.json 改动（eval 13 断言改写 + id 17 新增）后提交
-- **迭代记录：** `yes-subagents-workspace/iteration-1/` → `iteration-2/` → `iteration-3/` → `iteration-4/`
-- **评估项目：** 迭代 1 在自己项目上测试、迭代 2/3 在 `cli_dotlink` 上测试、迭代 4 在 `app_viz-jzy`（kaisa-event-dashboard）测试
+- **当前状态：** 迭代 5 收尾（版本保持 0.4.0）。新增 pruner（收尾清理）/ scout（删除安全核验）两子代理并完成全部验证：v2 复跑 9 PASS / 1 FAIL / 1 NOT GRADED；id 20 scout 首次取证（派遣链 tool_use_id 实证）；四项决策落地后 v3 复跑 6 PASS / 1 未取得数据。关键契约：pruner 持 Agent 工具嵌套派遣 scout（自检不替代）、收尾范围文件级、删除纪律（禁 rm -rf/通配符）、原子提交为里程碑退出条件。架构发现 12：capable pruner 起草即全仓 grep，scout 价值定位为「独立双确认 + 动态引用盲区覆盖 + 越界发现外溢上报」。下轮候选：description 自然触发 A/B、grep 不可见引用形态的甄别 fixture。详见 `yes-subagents-workspace/iteration-5/REPORT.md`（本地工作区，已 gitignore）
+- **迭代记录：** `yes-subagents-workspace/iteration-1/` → `iteration-2/` → `iteration-3/` → `iteration-4/` → `iteration-5/`
+- **评估项目：** 迭代 1 在自己项目上测试、迭代 2/3 在 `cli_dotlink` 上测试、迭代 4 在 `app_viz-jzy`（kaisa-event-dashboard）测试、迭代 5 在 `app_peony`（双沙盒克隆 + eval-base tag）测试
 - **迭代 3：** 重写 b10b8bd 的虚构用例（id 6-12 落地 cli_dotlink + 沙盒）；发现 BLOCKED 补全漏洞（eval11 FAIL）并已修复验证通过；全部 12 用例 with_skill 数据完整，33/33 已评分断言通过；详见 `yes-subagents-workspace/iteration-3/REPORT.md`
 - **迭代 4：** 基于 Sketch 插件任务真实反馈，新增「计划审查阈值」（薄计划层可跳过 critic-strict 但需显式声明理由；偏离已审草案为机械触发），v0.3.0 已落地并完成评估。厚层拦截（id 14/15）与偏离机械触发（id 16）3/3 全部通过；eval 13 的 2 个 FAIL 判定为用例前提错误（单文件改动但编号规则实为非平凡生成性选择，agent 正确触发审查且抓到 without_skill 漏掉的真实缺陷），非 skill 缺陷；详见 `yes-subagents-workspace/iteration-4/REPORT.md`
 
@@ -23,7 +23,8 @@
 
 - `./skill/subagents/` — 本地子代理定义
 - 与内置子代理职责重复时优先内置，但在指令中注入输出契约（PRECONDITION / Output exactly / STATUS）
-- 子代理分类：监察类（critic-strict / critic-gate）、调查类（quality-auditor / debugger / researcher）、行动类（swarm / coder）
+- 子代理分类：监察类（critic-strict / critic-gate / scout）、调查类（quality-auditor / debugger / researcher）、行动类（swarm / coder / pruner）
+- 子代理契约与设计规范见 `skill/subagents/SCHEMA.md`；工作流模板见 `skill/workflow/`
 
 ## 迭代 2 关键验证结果
 
