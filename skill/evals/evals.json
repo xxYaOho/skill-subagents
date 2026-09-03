@@ -207,6 +207,47 @@
         "两种配置：方案正确——仅改 Header.tsx 的 h1 文案为「AI事件全流程处置大屏」，不引入额外改动",
         "without_skill：直接产出方案，无计划审查阈值相关的编排痕迹"
       ]
+    },
+    {
+      "id": 18,
+      "eval_name": "milestone-complete-prune-sweep",
+      "prompt": "peony 的 watchlist 列表目前不支持按状态筛选。帮我加一个 --status 选项：取值 观察中 / 已持有 / 已取消，只显示对应状态的标的，默认不过滤保持现状。分两个里程碑推进：M1 实现 --status 筛选并补测试（pytest 必须全绿）；M2 同步更新 llm-help.md 里 watchlist 的说明。项目在 SANDBOX_DIR（这是项目副本，可以直接改）。不用问我，两个里程碑全部做完再汇报。",
+      "expected_output": "验证 v0.4.0 新增收尾整理环节与 pruner/scout 子代理。沙盒 fixture 基线（commit 'chore: eval fixture baseline'）预埋两类目标：真死代码 _fmt_sort_key（watchlist_cmd.py，零引用，应 SAFE 并移除）；伪死代码 _normalize_code（watchlist_cmd.py 定义，被未触及文件 export_cmd.py 引用，pruner 触及范围扫描看不到该引用，scout 全局核验应判 UNSAFE 并保留）。预期：两个里程碑完成后进入收尾，pruner 产出清理计划，scout 逐项核验，只执行 SAFE 目标，执行后自行验证；without_skill 无此环节。",
+      "files": [],
+      "assertions": [
+        "with_skill：两个里程碑完成后触发收尾整理，派遣 pruner（或按 subagents/pruner.md 契约注入派遣的执行代理），产出含目标位置、动作、理由的清理计划",
+        "with_skill：清理计划经 scout（或按 subagents/scout.md 契约注入派遣的只读核验代理）逐项核验后才执行，判定附引用证据",
+        "两种配置：任务本体完成——watchlist 列表支持 --status 筛选（观察中/已持有/已取消，程序化核验三种取值输出）、沙盒内 pytest 全绿（程序化核验）、llm-help.md 已同步更新",
+        "with_skill：甄别正确——预埋真死代码 _fmt_sort_key 被移除；伪死代码 _normalize_code 未被移除且 export 功能未破坏（程序化核验）",
+        "with_skill：清理不越界——UNSAFE/UNCERTAIN 目标未以任何形式执行，无任务触及范围外的文件改动（程序化核验 git diff 范围）",
+        "without_skill：完成两个里程碑后直接交付，无「清理计划→核验→执行」收尾环节，预埋死代码保留原样"
+      ]
+    },
+    {
+      "id": 19,
+      "eval_name": "dead-code-inventory-boundary",
+      "prompt": "帮我盘点一下 peony 里有没有没被引用的死代码（未使用的函数、孤立模块、没人调用的导出），列一份清单，标注每项的位置和判断依据。项目在 SANDBOX_DIR（这是项目副本，只调研，不要改任何文件）。",
+      "expected_output": "验证 pruner/scout 的边界不被误派。任务为存量调查而非里程碑实施后的收尾：应派遣调查类（quality-auditor 或按契约注入派遣的只读调查代理）产出债务报告；pruner（仅限本次任务触及文件、且属实施后清理、可写）与 scout（无清理计划可核验）均不应出现。沙盒含与 id 18 相同的 fixture 预埋（_fmt_sort_key 真死代码 / _normalize_code 被引用），其盘点内容不参与评分，仅作观察。",
+      "files": [],
+      "assertions": [
+        "with_skill：派遣调查类子代理（quality-auditor 或按契约注入派遣的只读调查代理）执行存量扫描",
+        "with_skill：不派遣 pruner 与 scout（本任务非里程碑实施后的收尾环节，只读调研与其行动/核验契约不匹配）",
+        "两种配置：未修改项目任何文件（程序化核验 git status 干净）",
+        "without_skill：直接产出清单，无多代理编排或独立复核痕迹"
+      ]
+    },
+    {
+      "id": 20,
+      "eval_name": "cleanup-plan-scout-gate",
+      "prompt": "peony 的已实现盈亏核算内核 _get_realized_pnl 目前放在 peony/commands/status_cmd.py 里，给它建一个独立模块 peony/pnl.py 迁过去。分两个里程碑推进：M1 完成迁移，status_cmd 与 watchlist_cmd 的调用点改走新位置；status_cmd 原位置保留同名兼容包装（迁移期临时保留）；同时在 pnl.py 落一个 realized_pnl_label(db, code) 带符号文案备用函数（本期不接线）。M2 同步 llm-help.md 里 status 命令段的已实现盈亏口径说明。两个迁移期临时项（兼容包装、备用函数）收尾时若确认无人使用可移除。两个里程碑完成后，安排 subagent pruner 完成收尾清理。项目在 SANDBOX_DIR（这是项目副本，可以直接改）。不用问我，全部做完再汇报。",
+      "expected_output": "with_skill：critic-strict 审查计划后实施；M1 迁移完成且测试全绿（tests 从 status_cmd 导入的用例经兼容包装继续工作）；收尾派遣 pruner，PLAN 非空（至少含兼容包装与备用函数两个目标）；pruner 派遣 scout 全仓核验：兼容包装因 peony/db.py 与 peony/commands/butterfly_cmd.py 的惰性 import（及两个测试文件的导入）判 UNSAFE 保留，备用函数零引用判 SAFE 移除；执行后门禁绿。",
+      "files": [],
+      "assertions": [
+        "with_skill：收尾清理计划非空——pruner PLAN 含至少两个目标（status_cmd 兼容包装与 pnl.py 备用函数）",
+        "with_skill：scout 被派遣——pruner 会话内出现 subagent_type=scout 的 Agent 派遣（嵌套派发首次取证）",
+        "with_skill：甄别正确——兼容包装保留（scout 判 UNSAFE 或 UNCERTAIN：peony/db.py 与 butterfly_cmd.py 惰性引用 + tests 导入），备用函数被移除（SAFE 路径执行）",
+        "两种配置：门禁绿——pytest 通过、ruff 无错、mypy 无错（程序化核验；收尾执行不得破坏 tests 对 status_cmd 导入路径的依赖）"
+      ]
     }
   ]
 }
