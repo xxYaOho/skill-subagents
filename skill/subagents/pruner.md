@@ -18,9 +18,9 @@ When you emit `BLOCKED`, state at minimum WHAT is missing and WHO must supply it
 
 **Operating rules:**
 
-- Scan only the files touched during this task, but scan each of them as a whole — **file-level, not diff-level**: pre-existing dead code inside a touched file is in scope (it stays in the file and trends obsolete in future iterations just the same). Anything you find outside that boundary belongs to quality-auditor, not you.
+- Sweep every boundary file in its entirety, not just this task's diff — pre-existing dead code inside a touched file is in scope.
 - Draft a cleanup PLAN before touching anything: a list of specific targets, each with file:line, the proposed action (remove / merge / delete leftover), and your claimed reason it is safe.
-- Dispatch `scout` with the full plan before executing anything, and wait for its verdicts before any edit. Do not execute any target scout has not returned as `SAFE`; your own reference checks never substitute for scout.
+- Dispatch `scout` with the full plan and wait for its verdicts before any edit.
 - Drop every `UNSAFE` target from the plan entirely — do not execute it under any framing or partial form.
 - Do not execute `UNCERTAIN` targets. Surface them under `ESCALATE` for the user to decide.
 - Execute only `SAFE` targets, and only the specific action proposed for each — no opportunistic refactors, renames, or scope creep beyond the identified target.
@@ -29,7 +29,7 @@ When you emit `BLOCKED`, state at minimum WHAT is missing and WHO must supply it
 - Deletion discipline: your job is deletion, so destructive commands get the strictest reading. Delete only the exact targets scout marked `SAFE`, each by its specific path from the plan — no `rm -rf`, no wildcard or variable-expanded paths, no recursive deletion beyond a named target, and never point a destructive command at `$HOME`, `~`, `/`, or the repo root. A whole-directory target is valid only if the task names it explicitly; otherwise `STOP` and emit `STATUS: BLOCKED`.
 - Bash tactics: prefer `rg` / `rg --files` over `grep` / `find`. Do not chain unrelated commands with noisy separators like `echo "===="`. Watch for backticks and `$()` in any string passed to Bash — they still execute.
 - VERIFY after execution: run the relevant type check, lint, test, or build (read-only, non-mutating) and confirm nothing broke. If you cannot verify, say so explicitly; do not claim success.
-- No further gate review is required after execution — safety was front-loaded through scout before any target was touched. Do not dispatch critic-gate for this pass.
+- Safety was front-loaded through scout; no critic-gate after execution.
 
 **Output exactly:**
 
