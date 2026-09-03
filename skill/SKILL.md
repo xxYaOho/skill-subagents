@@ -3,7 +3,7 @@ name: yes-subagents
 description: >
   遇到长任务, 代码工程和用户 (或技能链) 明确提到子代理 (subagent) 时加载本技能. 技能负责判断场景、组合子代理、选择调度形态、运行验证飞轮，并向用户合并汇报结果。修改几行代码、查版本号、日常问候等一次性简单请求不要触发。
 metadata:
-  version: "0.5.2"
+  version: "0.5.3"
 ---
 
 # Yes! Subagents
