@@ -12,7 +12,7 @@
 
 - 编排子代理的辅助技能
 - 版本真源在 `SKILL.md` 的 frontmatter
-- SKILL.md 保持中文（匹配触发和交互习惯）
+- 使用中文编辑 `SKILL.md`
 
 ## Simple Wiki
 
