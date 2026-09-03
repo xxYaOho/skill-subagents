@@ -22,7 +22,7 @@ effort: high # low | medium | high | xhigh | max
 - `model`: 指定模型, `haiku | sonnet | opus | inherit | model-id`. inherit 是跟随主会话
   - `effort`: 思考强度, `low | medium | high | xhigh | max`.
 
-`name`：kebab-case，必须与文件名（不含 `.md`）完全一致。现有命名参照职责而非动作——`critic-strict`、`critic-gate`、`quality-auditor`、`debugger`、`researcher`、`swarm`、`coder`、`librarian`——名字要让 orchestrator 一眼判断"这是谁、和谁不重复"。
+`name`：kebab-case，必须与文件名（不含 `.md`）完全一致。现有命名参照职责而非动作——`critic-strict`、`critic-gate`、`quality-auditor`、`debugger`、`researcher`、`swarm`、`coder`、`coder-plus`、`librarian`——名字要让 orchestrator 一眼判断"这是谁、和谁不重复"。
 
 `description`：一段折叠文本，依次覆盖四件事，缺一不可：
 
@@ -38,6 +38,7 @@ effort: high # low | medium | high | xhigh | max
 - 纯审查/调查类（不产生变更）：`Read, Grep, Glob`（需要外部检索则加 `WebSearch`）。
 - 需要跑命令但只读诊断：`Read, Grep, Glob, Bash`。
 - 需要落地变更：`Read, Grep, Glob, Bash, Edit, Write`。
+- 需要嵌套派遣叶子代理的编排型行动代理（如 `coder-plus` 派 `coder`/`swarm`、`pruner` 派 `scout`）：在上一档之上加 `Agent`。
 
 永远不要给审查类 agent 加 `Edit` / `Write`——工具权限是这个 agent 是否可信改动状态的第一道防线。
 
@@ -77,7 +78,7 @@ You are a senior <ROLE>. <MISSION_IN_ONE_OR_TWO_SENTENCES>.
 
 ### Challenge before you build（可选）
 
-仅当这个 agent 会构建/决策某个产物、且可能收到一个本身有问题的任务时才加，目前只有 `coder.md` 有此段。审查类 / 只读调查类 agent 不需要，因为它们本来就以"挑错"为业务。
+仅当这个 agent 会构建/决策某个产物、且可能收到一个本身有问题的任务时才加，目前构建型代理 `coder.md` 与 `coder-plus.md` 有此段。审查类 / 只读调查类 agent 不需要，因为它们本来就以"挑错"为业务。
 
 ```
 **Challenge before you build:**
@@ -148,7 +149,7 @@ VERIFY before reporting success: <HOW_TO_VERIFY_FOR_THIS_DOMAIN>. If you cannot 
 
 现有三套字段命名可直接参照：
 
-- 行动类（coder / swarm）：`RESULT, DECISIONS(可选), CHANGES, VERIFICATION, ESCALATE`
+- 行动类（coder / swarm / coder-plus）：`RESULT, DEVIATIONS(里程碑级执行者 coder-plus 必填, 单任务行动类无), DECISIONS(可选), CHANGES, VERIFICATION, ESCALATE`
 - 调查/诊断类（researcher / debugger）：`ANSWER` 或 `ROOT CAUSE, EVIDENCE, NOTES/CONFIDENCE, ESCALATE`
 - 审查/裁决类（critic-strict / critic-gate / quality-auditor）：按严重度分级（`FATAL/MAJOR/MINOR` 或 `BLOCKING/NON-BLOCKING`），加 `UNVERIFIED`、`ESCALATE`
 

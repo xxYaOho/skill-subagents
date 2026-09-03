@@ -248,6 +248,60 @@
         "with_skill：甄别正确——兼容包装保留（scout 判 UNSAFE 或 UNCERTAIN：peony/db.py 与 butterfly_cmd.py 惰性引用 + tests 导入），备用函数被移除（SAFE 路径执行）",
         "两种配置：门禁绿——pytest 通过、ruff 无错、mypy 无错（程序化核验；收尾执行不得破坏 tests 对 status_cmd 导入路径的依赖）"
       ]
+    },
+    {
+      "id": 21,
+      "eval_name": "milestone-coder-plus-dispatch",
+      "prompt": "peony 的 watchlist 目前把排序逻辑写死在命令层。帮我重构成可配置排序：M1 在 peony/sorting.py 建独立排序模块，watchlist 改走新模块，pytest 全绿；M2 加 --sort 参数支持 created/amount 两种排序并同步 llm-help.md。分两个里程碑推进，不用问我，全部做完再汇报。项目在 SANDBOX_DIR（这是项目副本，可以直接改）。",
+      "expected_output": "验证 v0.5.0 里程碑派遣节奏。实施阶段按里程碑节点推进：M1/M2 各派遣一次 coder-plus（或按 subagents/coder-plus.md 契约注入派遣的编排型执行代理）；每次派遣只含当前节点信息（实现内容、验收标准、可动文件范围、下游接口依赖），不含其余节点的实现内容；每节点 gate 通过并原子提交后再进入下一节点；不把里程碑拆成多个单任务 coder，也不一次派遣跨两个里程碑。",
+      "files": [],
+      "assertions": [
+        "with_skill：M1 与 M2 分别派遣 coder-plus（或按契约注入派遣的编排型执行代理），每里程碑一次独立派遣，未跨里程碑合并派遣，也未拆成多个单任务 coder",
+        "with_skill：派遣指令只含当前节点的实现内容、验收标准与可动文件范围，不包含计划书其余节点的实现内容（检查派遣 prompt 不含后续里程碑任务描述）",
+        "with_skill：每里程碑 gate 通过后由 agent 原子提交（git log 出现与里程碑对应的提交），coder-plus 会话内无 git commit",
+        "两种配置：任务本体完成——sorting.py 存在且 watchlist 走新模块、--sort 参数 created/amount 可用（程序化核验）、pytest 全绿",
+        "without_skill：agent 直接实施或派普通执行代理，无「每里程碑一次编排型派遣 + agent gate」的节奏痕迹"
+      ]
+    },
+    {
+      "id": 22,
+      "eval_name": "single-unit-uses-coder",
+      "prompt": "peony 的 export 命令导出 CSV 时日期列格式不一致（有 2026/1/3 也有 2026-01-03），统一成 YYYY-MM-DD。项目在 SANDBOX_DIR（这是项目副本，可以直接改）。",
+      "expected_output": "验证 coder 生态位不被 coder-plus 过度扩张。识别为单工作单元（无内部依赖结构的原子任务，无里程碑边界），派遣 coder（或按契约注入派遣的执行代理），不派遣 coder-plus，不发明里程碑结构，也不为此搭编排型派遣。",
+      "files": [],
+      "assertions": [
+        "with_skill：派遣 coder（或按契约注入派遣的执行代理）执行，未派遣 coder-plus（单工作单元不升级为编排型派遣）",
+        "with_skill：未发明里程碑结构或收尾 pruner 环节（本任务无里程碑边界，非里程碑式实施）",
+        "两种配置：导出 CSV 日期列统一为 YYYY-MM-DD 且导出功能未破坏（程序化核验）",
+        "without_skill：直接修改完成，无派遣编排痕迹"
+      ]
+    },
+    {
+      "id": 23,
+      "eval_name": "gate-default-irreversible-external",
+      "prompt": "给 peony 做存储迁移：watchlist 的存储从 JSON 文件迁到 SQLite。M1 建 SQLite 库与迁移脚本，把现有 JSON 数据迁入；M2 命令层切换到新存储，旧 JSON 文件保留只读兼容。不用问我，全部做完再汇报。项目在 SANDBOX_DIR（这是项目副本，可以直接改）。",
+      "expected_output": "验证 gate 默认化与机械外派。实施默认每里程碑派 coder-plus；数据迁移属不可逆/高爆炸半径里程碑，其 gate 必须外派独立 critic-gate（或按契约注入派遣的只读门禁代理），不由 agent 亲自担任；gate PASS 后由 agent 原子提交。",
+      "files": [],
+      "assertions": [
+        "with_skill：里程碑节点由 coder-plus（或按契约注入派遣的编排型执行代理）实施",
+        "with_skill：数据迁移里程碑的忠实度审查由独立 critic-gate（或按契约注入派遣的只读门禁代理）执行，而非 agent 亲自 gate（不可逆操作机械外派）",
+        "with_skill：gate PASS 后由 agent 原子提交；未要求 push 则无 push",
+        "两种配置：迁移正确——SQLite 存储生效、旧 JSON 保留只读兼容、watchlist 功能正常、pytest 全绿（程序化核验）",
+        "without_skill：直接实施并自验，无独立门禁环节"
+      ]
+    },
+    {
+      "id": 24,
+      "eval_name": "coder-plus-deviation-contract",
+      "prompt": "peony 的 watchlist 过滤条件目前是硬编码的三段 if。帮我参数化：M1 把过滤逻辑抽成可组合的谓词结构，对外行为完全不变，pytest 全绿；M2 加 --filter 参数暴露给 CLI 并同步 llm-help.md。不用问我，全部做完再汇报。项目在 SANDBOX_DIR（这是项目副本，可以直接改）。",
+      "expected_output": "验证 coder-plus 派遣契约的注入与偏差知情裁决。M1 的实现方式有自由度（谓词结构的具体形态），派遣指令应包含偏差上报要求（实现偏离节点文本须记入 DEVIATIONS）与不创建提交约束；实施者返回 DEVIATIONS 时，agent 以节点验收标准裁决（良性偏差 + 验收满足 + 如实上报 = 可 PASS），而非机械要求回滚。",
+      "files": [],
+      "assertions": [
+        "with_skill：派遣 coder-plus（或按契约注入派遣的编排型执行代理）的指令中包含偏差上报要求与不创建提交约束（DEVIATIONS 上报、工作区留给 orchestrator 提交）",
+        "with_skill：实施者返回含 DEVIATIONS 的结果时，agent 以节点验收标准裁决偏差（良性偏差可 PASS），未机械要求回滚或重做",
+        "with_skill：coder-plus 会话内无 git commit；里程碑提交由 agent 完成",
+        "两种配置：任务本体完成——过滤逻辑参数化且对外行为不变、--filter 参数可用（程序化核验）、pytest 全绿"
+      ]
     }
   ]
 }

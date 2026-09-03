@@ -3,7 +3,7 @@ name: yes-subagents
 description: >
   遇到长任务, 代码工程和用户 (或技能链) 明确提到子代理 (subagent) 时加载本技能. 技能负责判断场景、组合子代理、选择调度形态、运行验证飞轮，并向用户合并汇报结果。修改几行代码、查版本号、日常问候等一次性简单请求不要触发。
 metadata:
-  version: "0.4.1"
+  version: "0.5.0"
 ---
 
 # Yes! Subagents
@@ -29,6 +29,7 @@ metadata:
 3. 行动类
    - Swarm：执行简单、同质、边界明确的工作单元；可单体、普通并行或作为蜂群成员派遣
    - Coder：执行需要跨文件推理、项目约定或需求质疑的工作单元；可单体、普通并行或作为蜂群成员派遣
+   - Coder Plus：按已批准计划书的里程碑节点实施——分解原子任务、编排内部派遣（Coder/Swarm）、交付独立可验证单元；实施阶段的默认执行者，非蜂群成员；完整契约由 `subagents/coder-plus.md` 持有
    - Pruner：编码任务全部里程碑完成后，清理本次任务触及文件中的冗余与残留；行动前须经 Scout 核验，执行后不回退到 Critic Gate 复核；完整契约由 `subagents/pruner.md` 持有
 
 > **豁免**
@@ -68,6 +69,8 @@ Action Again
 
 蜂群不绑定代理类型。简单、同质单元优先使用 `swarm`；需要工程推理的单元使用 `coder`；调查或监察代理也可组成蜂群。每个成员必须有明确职责、输入边界和输出契约。
 
+含里程碑结构的计划，实施阶段按里程碑节点推进：默认每个节点派遣一次 `coder-plus`，节点通过 gate 并提交后再进入下一节点。分派判据（里程碑节点 / 单工作单元 / 蜂群 / agent 亲自）与派遣纪律见 `workflow/coding.md`。
+
 ### 待机
 
 子代理运行在独立的上下文空间中，执行过程不进入编排者的上下文。派遣完成即工作交接完成：任务、边界与输出契约都已随派遣指令交付，之后以完成通知作为推进信号。
@@ -85,14 +88,14 @@ Action Again
 
 - 想法、草案、报告或会被后续决策依赖的结论使用 `critic-strict`
 - 计划是否使用 `critic-strict`，按对应 workflow 文件中的判断标准（如 `workflow/coding.md` 的「计划审查阈值」）决定
-- 存在实现忠实度、回归、契约或隐藏正确性风险时使用 `critic-gate`
-- 存在 `coder` 时, agent 可以主动担任 `critic-gate`, 而不必重新派遣
+- 存在实现忠实度、回归、契约或隐藏正确性风险时进入 gate 审查
+- gate 默认由 agent 亲自担任：忠实度审查依赖计划全文上下文，外派意味着重复加载；执行者是子代理（如 `coder-plus`），agent 审查他人产出，不属于 self-critique。不可逆或高爆炸半径里程碑必须外派独立 `critic-gate`，其余由 agent 裁量，触发条件见 `workflow/coding.md`
 
 监察补充直接验证的盲区，不能替代测试、构建或真实渲染。完整审查契约由对应 subagent 文件持有。
 
 ## 审查与阻断
 
-审查必须交给 fresh agent。不要 self-critique 自己的草案、方案、报告或实现；需要监察时，直接派遣对应 Critic。
+审查必须交给 fresh agent。不要 self-critique 自己的草案、方案、报告或实现；需要监察时，直接派遣对应 Critic。实施阶段的 gate 是例外：执行者（`coder-plus` / `coder`）是子代理，agent 审查的是他人产出而非自己的实现，因此 gate 默认由持有计划全文的 agent 亲自担任（触发条件见 `workflow/coding.md`）。
 
 派遣 Critic 后等待结果，不预判结论提前修改。若返回 `STATUS: BLOCKED`，先区分缺失项类型：
 
