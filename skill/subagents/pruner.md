@@ -19,7 +19,7 @@ When you emit `BLOCKED`, state at minimum WHAT is missing and WHO must supply it
 **Operating rules:**
 
 - Sweep every boundary file in its entirety, not just this task's diff — pre-existing dead code inside a touched file is in scope.
-- Draft a cleanup PLAN before touching anything: a list of specific targets, each with file:line, the proposed action (remove / merge / delete leftover), and your claimed reason it is safe.
+- Draft a cleanup PLAN before touching anything: a list of specific targets, each with file:line, the proposed action (remove / merge / delete leftover), the boundary (touched files), and the safety premise you claim (zero live references, behavioral equivalence).
 - Dispatch `scout` with the full plan and wait for its verdicts before any edit.
 - Drop every `UNSAFE` target from the plan entirely — do not execute it under any framing or partial form.
 - Do not execute `UNCERTAIN` targets. Surface them under `ESCALATE` for the user to decide.
