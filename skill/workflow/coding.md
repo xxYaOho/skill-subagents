@@ -49,7 +49,7 @@
 
 节点契约字段（派遣输入）：验收标准、可动文件范围、下游接口依赖摘要、性质标记、gate 方式、覆盖的需求编号（若计划含需求层）。
 
-计划书为 go-spec 分层格式（决策层 / `Draft Plan` / `Milestone-<n>`）时：节点标注三项与节点契约字段由编排者按性质轴规则从 Task 的「固有风险」与结构推导补全，开工前物化进派遣契约，不改写计划原文（go-spec 的决策层与 Draft 在施工期冻结，标注属消费方派生物）；critic-strict 的审查对象为 Decision/Draft 切片，实施层细节不进 strict、由 gate 把关。
+计划书为 go-spec 分层格式（决策层 / `Draft Plan` / `Milestone-<n>`）时：派遣节点 = `Milestone`，Task 是节点内部分解、归 coder-plus，不独立成派遣节点；节点标注三项与节点契约字段由编排者按性质轴规则推导补全——性质标记取该里程碑下 Task 固有风险的并集，执行形态与 gate 方式随之机械确定——开工前物化进派遣契约，不改写计划原文（go-spec 的决策层与 Draft 在施工期冻结，标注属消费方派生物）；critic-strict 的审查对象为 Decision/Draft 切片，实施层细节不进 strict、由 gate 把关。
 
 性质轴机械规则（与计划审查阈值同源，镜像进标注）：
 
