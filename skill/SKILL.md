@@ -72,7 +72,7 @@ Action Again
 
 > [!IMPORTANT]
 > **避免冗余**
-> Strict 的局部修正使用 DELTA；结构性修正使用 FULL。保持输入最小，但不得用增量输入掩盖结构变化；具体判据以 `subagents/critic-strict.md` 为准。
+> Strict `FAIL` 后的局部 FATAL 修正使用 DELTA；结构性修正使用 FULL。`PASS` 后的 MAJOR/MINOR 默认随交付进入后续阶段，不自动复审。具体判据以 `subagents/critic-strict.md` 为准。
  
 ### 调度
 
