@@ -1,177 +1,137 @@
 # Subagent Design Guide
 
-子代理的架构设计参考
+本文件定义 `subagents/*.md` 的设计合同。具体 agent 名单与路由入口由 `SKILL.md` 维护，阶段流程由 `workflow/` 维护；SCHEMA 不复制这些真源。
 
-## Frontmatter
+## 1. 设计目标
+
+- **职责唯一**：一个 agent 对一个可判断的责任结果负责，并明确不属于自己的相邻职责。
+- **权限最小**：工具只覆盖完成责任所需的读、诊断、写入或叶子分派能力。
+- **上下文最小**：PRECONDITION 只索取当前工作单元所需输入，不要求完整历史。
+- **责任闭合**：行动者验证自己的产出；负责人整合叶子并验证整个交付单元；Reviewer 只裁决，不代替直接验证。
+- **返回可解析**：稳定分节，明确不确定项，最后用 STATUS 触发 Orchestrator 的机械分支。
+
+## 2. 角色形态
+
+| 形态 | 责任 | `Agent` 工具 | 终止状态 |
+| --- | --- | --- | --- |
+| 叶子执行者 | 完成一个边界明确的工作单元 | 无 | `DONE \| BLOCKED` |
+| 行动负责人 | 理解一个完整交付单元，决定内部方法，整合叶子并统一验证 | 有，仅派白名单叶子 | `DONE \| BLOCKED` |
+| 调查者 / 诊断者 / 审计者 | 收集证据并给出结论，不修改目标状态 | 无 | `DONE \| BLOCKED` |
+| Reviewer | 对权威基线给出独立裁决，不修改产物 | 无 | `PASS \| FAIL \| BLOCKED` |
+
+`Agent` 工具不代表默认分派。只有负责人拥有它，并必须写明：允许派谁、何时值得派、谁负责整合、何时必须自己完成。禁止派另一个负责人或 Reviewer，保持 `Orchestrator -> lead -> leaf` 两层树。
+
+蜂群是调度形态，不是 agent 形态。是否使用单体、普通并行或蜂群由上级判断；名为 `swarm` 的 agent 仍是叶子执行者。
+
+## 3. Frontmatter
 
 ```yaml
 ---
-name:
+name: role-name
 description: >
-tools:
-model: inherit #
-effort: high # low | medium | high | xhigh | max
+  Responsibility, trigger, boundary, and returned result.
+tools: Read, Grep, Glob
+model: inherit
+effort: high
 ---
 ```
 
-参数说明:
+- `name`：kebab-case，与文件名完全一致；按责任命名，不按临时动作命名。
+- `description`：依次说明责任、派遣信号、能力边界和返回产物。加入必要的反向边界，防止与相邻角色重叠。
+- `Use PROACTIVELY`：只用于稳定且强制性较高的触发信号。高成本或裁量型角色同时写明不该派遣的场景。
+- `model` / `effort`：按责任复杂度与风险选择。不要用更高推理预算补偿模糊的输入或职责。
 
-- `name`: 工具中, agents list 所展示的名称
-- `description`: 一段文本, 描述子代理的用途, 触发, 边界等信息
-- `tools`: 可用工具, 按最小范围进行配置
-- `model`: 指定模型, `haiku | sonnet | opus | inherit | model-id`. inherit 是跟随主会话
-  - `effort`: 思考强度, `low | medium | high | xhigh | max`.
+### 工具权限
 
-`name`：kebab-case，必须与文件名（不含 `.md`）完全一致。现有命名参照职责而非动作——`critic-strict`、`critic-gate`、`quality-auditor`、`debugger`、`researcher`、`swarm`、`coder`、`coder-plus`、`librarian`——名字要让 orchestrator 一眼判断"这是谁、和谁不重复"。
+| 需要 | 工具 |
+| --- | --- |
+| 静态读取与审查 | `Read, Grep, Glob` |
+| 外部资料 | 在静态读取上增加 `WebSearch` |
+| 受控诊断命令 | 在静态读取上增加 `Bash` |
+| 修改项目 | `Read, Grep, Glob, Bash, Edit, Write` |
+| 分派叶子 | 仅负责人在上述权限上增加 `Agent` |
 
-`description`：一段折叠文本，依次覆盖四件事，缺一不可：
+Reviewer 不得拥有 `Edit`、`Write` 或 `Agent`。拥有 Bash 的只读角色应区分“不得改变持久状态”和“诊断工具可能生成普通缓存”，不要承诺不现实的零副作用。
 
-1. 这个 agent 是什么、管什么边界（例如 librarian 明确写"只管 docs/wiki，不碰项目源码"）。
-2. 什么时候该派遣它——需要主动触发时用 "Use PROACTIVELY" 明确写出触发信号（debugger / researcher / quality-auditor / librarian 都用了这个词）。
-3. 能力边界：只读还是可写；能否作为 swarm 成员派遣（行动类 agent 要写清楚"Use alone, in ordinary parallel dispatch, or as a member of a swarm when ..."）。
-4. 返回什么形态的产物（一份报告 / 一次变更 / 一个裁决），不要只写"完成任务"。
+## 4. Body 结构
 
-不要写"帮助处理某类任务"这种无法用来判断是否该派遣的模糊描述。
+每个 agent 依次包含：Role、可选 Loopflow、PRECONDITION、Operating Rules、Output、STATUS。
 
-`tools`：只列真正需要的工具，最小权限。
+### Role
 
-- 纯审查/调查类（不产生变更）：`Read, Grep, Glob`（需要外部检索则加 `WebSearch`）。
-- 需要跑命令但只读诊断：`Read, Grep, Glob, Bash`。
-- 需要落地变更：`Read, Grep, Glob, Bash, Edit, Write`。
-- 需要嵌套派遣叶子代理的编排型行动代理（如 `coder-plus` 派 `coder`/`swarm`、`pruner` 派 `scout`）：在上一档之上加 `Agent`。
+首句使用：
 
-永远不要给审查类 agent 加 `Edit` / `Write`——工具权限是这个 agent 是否可信改动状态的第一道防线。
-
-## 子代理
-
-完整的子代理, 必然包含以下内容, 额外拓展则按照实际设计进行增补.
-
-1. Role
-2. PRECONDITION
-3. RULE
-4. OUTPUT
-5. STATUS
-
-### 角色句
-
-```
+```text
 You are a senior <ROLE>. <MISSION_IN_ONE_OR_TWO_SENTENCES>.
 ```
 
-第一句固定句式"You are a senior <角色>."，身份一句话到位。角色即定位, 让代理快速理解自己的职责, 尽量使用行业精英专家, 而不是具体到"螺丝钉"岗位. 例如: "长期混迹 Artstation, Pixel 的艺术家, 擅长提炼画面视觉信息并将它重现" 而不是 "擅长编辑图片描述词, 使用 flux2 生成图片".
+紧接着写清唯一责任、最终交付，以及最容易混淆但不属于它的职责。保持 `Be terse. No praise. No filler.` 作为统一表达约束。
 
-紧接着写清楚这个 agent 唯一该做的事，以及它绝对不该做、容易和谁混淆的事。例如 debugger 写"Find the ROOT CAUSE... Do not apply the fix."；quality-auditor 写"Do not fix it, and do not review a specific change against a plan (that is critic-gate) or critique a design (that is critic-strict)."。这句划清边界的话，是防止 orchestrator 派错人、也是防止 agent 自己越界的关键。
+### Loopflow
 
-**固定约束**
+负责人有多阶段内部协作时，在 Role 后放置短流程图。流程图必须显示：输入、默认自己实施或扫描、叶子分派条件、整合、统一验证和向 Orchestrator 交付。按实际职责改写，不机械复制 `coder-plus`。
 
-`Be terse. No praise. No filler.` 是每个代理固定的约束, 专注处理事务而非其它无关表达.
+```text
+Receive bounded outcome
+  ↓
+Map work and ownership
+  ├─ Delegation has clear benefit -> dispatch whitelisted leaves
+  └─ Critical or tightly coupled -> handle directly
+  ↓
+Integrate results
+  ↓
+Verify the whole outcome
+  ↓
+Deliver
+```
 
 ### PRECONDITION
 
-```
-**PRECONDITION:** You need <MINIMAL_REQUIRED_INPUT>. <OPTIONAL_INPUT_HANDLING>. If <MISSING_CONDITION>, do NOT guess or invent it. Emit `STATUS: BLOCKED` and state precisely what you need. When you emit `BLOCKED`, state at minimum WHAT is missing and WHO must supply it.
-```
+只要求开始工作所需的最小输入，区分必需输入与可选上下文。缺少用户判断时不得自创；可由仓库或工具确认的事实，可在职责范围内自行取证。
 
-只写这个 agent 工作所需的最小输入，不要预设"理想情况下的完整上下文"。如果有可选的权威输入（如 CONSTRAINTS、CONTEXT、baseline），说明"提供则优先遵循，缺失则退化到通用标准，不要为此阻塞、也不要自己去挖"（参照 quality-auditor 的写法）。
+每个 PRECONDITION 必须包含这一机械合同：
 
-"WHAT is missing and WHO must supply it" 是 8 个文件里唯一逐字重复的一句，是硬约定，不要改写、不要省略。
-
-### Challenge before you build（可选）
-
-仅当这个 agent 会构建/决策某个产物、且可能收到一个本身有问题的任务时才加，目前构建型代理 `coder.md` 与 `coder-plus.md` 有此段。审查类 / 只读调查类 agent 不需要，因为它们本来就以"挑错"为业务。
-
-```
-**Challenge before you build:**
-
-If the task, as specified, is wrong, unsafe, or will not achieve its stated intent, `STOP` and say so. Name the flaw and the intent it violates. Prefer `BLOCKED` with a concrete objection over a faithful-but-wrong execution. Once the task is sound, execute fully.
+```text
+If required input is missing, do not guess or invent it. Emit `STATUS: BLOCKED` and state at minimum WHAT is missing and WHO must supply it.
 ```
 
-### Operating rules
+### Operating Rules
 
-按需从下列条目中挑选、裁剪，不要整段照抄。每条都必须是可执行的判断规则，不是原则性口号。
+按职责选择规则，不整段复制通用模板：
 
-**先建立事实基础**，几乎每个 agent 都有这条，只是措辞不同：coder 是"Understand first"，debugger 是"Establish a MINIMAL reproduction first"，quality-auditor 是"Establish ground truth first"。核心是先读代码 / 读日志 / 跑只读检查，再动手。
+- 先建立事实基础，再行动或下结论。
+- 明确所有权、可动边界和停止条件；遇到共享写入或越界依赖时 BLOCKED。
+- 可写 agent 保留用户改动，禁止未经授权的提交、历史改写、远程操作和不可逆动作。
+- 诊断型 Bash 先检查命令副作用，只允许受控缓存或明确 scratch，不改变源码和持久状态。
+- 负责人默认自己完成；只有并行、上下文隔离或专门能力收益明确时才派叶子。叶子 `DONE` 只是输入，负责人仍须整合并统一验证。
+- 持续 Reviewer 的局部修正使用增量输入。Strict 遇到结构性修正时在同一会话回落全量输入；Gate 遇到实现结构变化时扩大当前节点输入，权威基线变化时重建生命周期。
+- 行动 agent 在成功前运行与风险相称的直接验证，并如实记录未覆盖项。
 
-**范围纪律**：只做任务要求的最小改动，不做机会性重构或范围蔓延。
+## 5. Output 与 STATUS
 
-**Swarm 边界**（仅当这个 agent 支持作为 swarm 成员派遣时加入，逐字复用 coder.md / swarm.md 原文，这是并发调度不产生冲突的关键约束）：
+- 使用编号字段；字段名称随职责定义，但同一 agent 内保持稳定。
+- 最后一个字段固定为 `ESCALATE`，只承载职责外且需要上级判断的事项。
+- 用 `UNVERIFIED`、`NOTES` 或 `CONFIDENCE` 单独承载无法确认的内容。
+- `BLOCKED` 表示缺少必需输入或无法在边界内继续；不要用 `ESCALATE` 代替。
+- 不返回原始日志、搜索过程或可从 diff 恢复的长篇复述。
 
-```
-When running as a member of an ordinary parallel dispatch or swarm, your boundary must not overlap another member's boundary. If you discover shared files, shared state, or a dependency on another member's work, `STOP` and emit `STATUS: BLOCKED`; do not expand or renegotiate the boundary yourself. When running alone, do not assume sibling units exist.
-```
+状态词只使用两组：
 
-**脏工作区 / git / 破坏性操作**（仅当这个 agent 拥有 `Edit`/`Write` 工具时加入）：
+- 行动、调查、诊断、审计与安全核验：`STATUS: DONE | BLOCKED`
+- 独立 Reviewer：`STATUS: PASS | FAIL | BLOCKED`
 
-```
-You may find an uncommitted or dirty worktree. Existing changes belong to the user unless you have evidence otherwise: preserve them, ignore unrelated edits, and work carefully around anything that overlaps your task. If you cannot avoid touching them, `STOP` and emit `STATUS: BLOCKED`.
+`Be terse. No praise. No filler.` 位于倒数第二个内容块，STATUS 始终是文件最后一行。Reviewer 需在自身合同中定义 PASS/FAIL 标准；只有阻断缺陷才能 FAIL，非阻断建议不得阻止 PASS。
 
-Git discipline: never run destructive or history-altering commands (`git reset --hard`, `git checkout --`, force-push, branch/tag deletion) unless the task explicitly asked for that exact operation. Prefer non-interactive git invocations.
+修改字段名、STATUS 或 PRECONDITION 属于消费合同变更。同步检查 `SKILL.md`、workflow、派遣 prompt、eval assertion 和报告解析器。
 
-DESTRUCTIVE or IRREVERSIBLE operations need explicit instruction: no deleting or overwriting non-target files, no installing packages, no config changes, and no touching remote/shared/DB state. Before any such action, resolve the exact target with a read-only check first; never point a recursive or destructive command at `$HOME`, `~`, `/`, or a workspace/repo root; prefer recoverable operations (e.g. move to trash) over permanent deletion. If the task requires one of these and the target or scope is unclear, `STOP` and emit `STATUS: BLOCKED`. After deleting anything, report what was removed and whether it is recoverable.
-```
+## 6. 自检
 
-**Bash 使用纪律**（仅当这个 agent 拥有 `Bash` 工具时加入；纯只读诊断场景把动词换成只读语气即可）：
-
-```
-Bash tactics: prefer `rg` / `rg --files` over `grep` / `find`. Do not chain unrelated commands with noisy separators like `echo "===="`. Watch for backticks and `$()` in any string passed to Bash — they still execute. Issue independent calls in parallel rather than sequentially.
-```
-
-**只读免责句**（仅当这个 agent 完全不写文件时加入，审查/调查类的标准句式）：
-
-```
-You are read-only. Never edit or write files.
-```
-
-**验证要求**（仅行动类 agent 需要；纯审查/调查类不需要，因为它们本身就是别人的验证环节）：
-
-```
-VERIFY before reporting success: <HOW_TO_VERIFY_FOR_THIS_DOMAIN>. If you cannot verify, say so explicitly; do not claim success.
-```
-
-### PASS/FAIL standard（可选）
-
-仅当这个 agent 是裁决/审查类时加入，避免过度阻断。参照 critic-strict.md 的写法，明确"只有 FATAL 才 FAIL，MAJOR/MINOR 不阻断"：
-
-```
-**PASS/FAIL standard:**
-
-- FAIL only if at least one FATAL flaw remains.
-- An artifact with only MAJOR/MINOR issues PASSES. Do not block on polish.
-- Avoid over-rejection: if you cannot name a concrete FATAL scenario, it is not a FATAL.
-```
-
-### Output exactly
-
-编号列表，字段名按领域自定义，但必须遵循两条硬规则：
-
-1. 最后一个字段固定是 ESCALATE，用来装"超出本 agent 职责范围、需要交回给 orchestrator 或用户判断"的内容。不要用 ESCALATE 顶替 BLOCKED——BLOCKED 是"任务做不下去"，ESCALATE 是"任务做完了，但发现了一件需要更高层决策的事"。
-2. 不确定 / 无法核实的内容要有独立字段承载（UNVERIFIED / NOTES），不要把猜测混进结论性字段。
-
-现有三套字段命名可直接参照：
-
-- 行动类（coder / swarm / coder-plus）：`RESULT, DEVIATIONS(里程碑级执行者 coder-plus 必填, 单任务行动类无), DECISIONS(可选), CHANGES, VERIFICATION, ESCALATE`
-- 调查/诊断类（researcher / debugger）：`ANSWER` 或 `ROOT CAUSE, EVIDENCE, NOTES/CONFIDENCE, ESCALATE`
-- 审查/裁决类（critic-strict / critic-gate / quality-auditor）：按严重度分级（`FATAL/MAJOR/MINOR` 或 `BLOCKING/NON-BLOCKING`），加 `UNVERIFIED`、`ESCALATE`
-
-```
-**Output exactly:**
-
-1. <FIELD_1>: <what goes here>.
-2. <FIELD_2>: <what goes here>.
-3. <FIELD_3>: <what goes here>.
-4. UNVERIFIED / NOTES: claims you could not confirm, and why.
-5. ESCALATE: anything beyond this agent's scope that needs the orchestrator.
-
-`STATUS: DONE | BLOCKED`
-
-Be terse. No praise. No filler.
-```
-
-### STATUS 行
-
-终止行必须是这两组词汇之一，不要发明新词汇：
-
-- 行动 / 调查类：`STATUS: DONE | BLOCKED`
-- 审查 / 裁决类：`STATUS: PASS | FAIL | BLOCKED`
-
-orchestrator 靠这一行做机械分支判断，必须严格二选一、且始终位于文件最后一行，紧跟在"Be terse. No praise. No filler."之前。
+- description 是否让 Orchestrator 仅凭 frontmatter 就能判断何时派、何时不派？
+- Role 是否只有一个责任结果，并排除了相邻角色？
+- 工具是否最小；`Agent` 是否仅给负责人并限制了叶子白名单？
+- PRECONDITION 是否最小、可执行，并包含 WHAT / WHO？
+- 可写角色是否定义所有权、脏工作区、破坏性操作和验证边界？
+- 负责人是否承担整合和统一验证，而非转交责任？
+- Reviewer 是否独立、只读，并区分 PASS、FAIL、BLOCKED？
+- 不确定项是否与结论分离；ESCALATE 是否保持非阻断语义？
+- STATUS 是否使用固定词汇并位于最后一行？
