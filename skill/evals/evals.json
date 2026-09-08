@@ -251,56 +251,57 @@
     },
     {
       "id": 21,
-      "eval_name": "milestone-coder-plus-dispatch",
-      "prompt": "peony 的 watchlist 目前把排序逻辑写死在命令层。帮我重构成可配置排序：M1 在 peony/sorting.py 建独立排序模块，watchlist 改走新模块，pytest 全绿；M2 加 --sort 参数支持 created/amount 两种排序并同步 llm-help.md。分两个里程碑推进，不用问我，全部做完再汇报。项目在 SANDBOX_DIR（这是项目副本，可以直接改）。",
-      "expected_output": "验证 v0.5.0 里程碑派遣节奏。实施阶段按里程碑节点推进：M1/M2 各派遣一次 coder-plus（或按 subagents/coder-plus.md 契约注入派遣的编排型执行代理）；每次派遣只含当前节点信息（实现内容、验收标准、可动文件范围、下游接口依赖），不含其余节点的实现内容；每节点 gate 通过并原子提交后再进入下一节点；不把里程碑拆成多个单任务 coder，也不一次派遣跨两个里程碑。",
-      "files": [],
+      "eval_name": "micro-two-milestone-full-cycle",
+      "prompt": "micro-note 是一个极简笔记 CLI（SANDBOX_DIR，项目副本，可以直接改）。分两个里程碑帮我重构+扩展：M1 把 cli.py 和 export.py 里重复实现的 format_note 抽到新模块 fmt.py，两个调用点改走新模块，补上 fmt 的单元测试，pytest 全绿；M2 给 list 命令加 --upper 参数（输出转大写），并同步 llm-help.md。不用问我，两个里程碑全部做完再汇报。",
+      "expected_output": "验证 v0.5.x coding workflow 全链路（micro 规模）。计划切两个里程碑后按节点推进：M1/M2 各派遣一次 coder-plus（四件套输入、不含后续节点实现细节、偏差须记 DEVIATIONS、不创建提交）；两里程碑均可逆低爆炸半径，gate 由编排者亲自担任；gate PASS 后 agent 以 Conventional Commits 每里程碑一个原子提交；全部完成后派遣 pruner 收尾，pruner 内派 scout 核验后仅执行 SAFE。fixture 靶子：cli.py 与 export.py 各有一份漂移的重复 format_note（M1 抽取消除重复）；list 命令无 --upper（M2 靶点）。",
       "assertions": [
-        "with_skill：M1 与 M2 分别派遣 coder-plus（或按契约注入派遣的编排型执行代理），每里程碑一次独立派遣，未跨里程碑合并派遣，也未拆成多个单任务 coder",
-        "with_skill：派遣指令只含当前节点的实现内容、验收标准与可动文件范围，不包含计划书其余节点的实现内容（检查派遣 prompt 不含后续里程碑任务描述）",
-        "with_skill：每里程碑 gate 通过后由 agent 原子提交（git log 出现与里程碑对应的提交），coder-plus 会话内无 git commit",
-        "两种配置：任务本体完成——sorting.py 存在且 watchlist 走新模块、--sort 参数 created/amount 可用（程序化核验）、pytest 全绿",
-        "without_skill：agent 直接实施或派普通执行代理，无「每里程碑一次编排型派遣 + agent gate」的节奏痕迹"
+        "with_skill：M1 与 M2 分别恰派遣一次 coder-plus（或按 subagents/coder-plus.md 契约注入派遣的编排型执行代理），未跨里程碑合并派遣，也未拆成多个单任务 coder（transcript 取证 subagent_type）",
+        "with_skill：每次派遣指令含四件套——当前节点实现内容、验收标准、可动文件范围、下游接口依赖摘要——且不含 M2 的实现细节（防预支后续节点）",
+        "with_skill：派遣指令含偏差上报要求（偏离节点文本须记入 DEVIATIONS）与不创建提交约束（工作区留给 orchestrator 提交）",
+        "with_skill：coder-plus 返回含 DEVIATIONS 字段（无偏差记空亦合法），agent 以节点验收标准裁决偏差，未机械要求回滚或重做",
+        "with_skill：coder-plus 会话内无 git commit；gate PASS 后 agent 以 Conventional Commits 恰好创建 2 个原子提交（每里程碑一个），未 push",
+        "with_skill：M1/M2 属可逆低爆炸半径里程碑，gate 由编排者亲自担任——无外派 critic-gate 派遣（transcript 取证）",
+        "with_skill：收尾派遣 pruner，pruner 内派 scout 逐项核验，仅执行 SAFE 目标后收束",
+        "任务本体完成——fmt.py 存在且 cli.py/export.py 两处调用点改走新模块、fmt 单元测试存在、list --upper 输出转大写、llm-help.md 同步、pytest 全绿（程序化核验）"
       ]
     },
     {
       "id": 22,
-      "eval_name": "single-unit-uses-coder",
-      "prompt": "peony 的 export 命令导出 CSV 时日期列格式不一致（有 2026/1/3 也有 2026-01-03），统一成 YYYY-MM-DD。项目在 SANDBOX_DIR（这是项目副本，可以直接改）。",
-      "expected_output": "验证 coder 生态位不被 coder-plus 过度扩张。识别为单工作单元（无内部依赖结构的原子任务，无里程碑边界），派遣 coder（或按契约注入派遣的执行代理），不派遣 coder-plus，不发明里程碑结构，也不为此搭编排型派遣。",
-      "files": [],
+      "eval_name": "micro-single-unit-uses-coder",
+      "prompt": "micro-note 的 add 命令写入的时间戳是本地时间，统一改成 UTC ISO 8601 格式（SANDBOX_DIR，项目副本，可以直接改）。",
+      "expected_output": "验证分派梯度判单工作单元与 coder 生态位不被 coder-plus 过度扩张（micro 规模）。任务跨文件推理（note.py 时间戳写入、既有 store.json 数据、测试与行为回归）但无内部依赖结构、无里程碑边界：应派遣 coder，不派遣 coder-plus，不发明里程碑/gate/pruner 环节。'agent 亲自+一行声明'是平凡改动的路径，本任务跨文件且需验证，不构成平凡改动。",
       "assertions": [
-        "with_skill：派遣 coder（或按契约注入派遣的执行代理）执行，未派遣 coder-plus（单工作单元不升级为编排型派遣）",
-        "with_skill：未发明里程碑结构或收尾 pruner 环节（本任务无里程碑边界，非里程碑式实施）",
-        "两种配置：导出 CSV 日期列统一为 YYYY-MM-DD 且导出功能未破坏（程序化核验）",
-        "without_skill：直接修改完成，无派遣编排痕迹"
+        "with_skill：派遣 coder（或按 subagents/coder.md 契约注入派遣的执行代理）执行，未派遣 coder-plus（单工作单元不升级为编排型派遣）；'agent 亲自+一行声明'不作为本断言的合格路径（任务跨文件推理，非平凡改动）",
+        "with_skill：未发明里程碑结构、gate 或收尾 pruner 环节（本任务无里程碑边界，非里程碑式实施）",
+        "任务本体完成——add 新写入的时间戳为 UTC ISO 8601（程序化核验：created 字段匹配 UTC 格式且时区正确）、既有命令行为不破坏、pytest 全绿"
       ]
     },
     {
       "id": 23,
-      "eval_name": "gate-default-irreversible-external",
-      "prompt": "给 peony 做存储迁移：watchlist 的存储从 JSON 文件迁到 SQLite。M1 建 SQLite 库与迁移脚本，把现有 JSON 数据迁入；M2 命令层切换到新存储，旧 JSON 文件保留只读兼容。不用问我，全部做完再汇报。项目在 SANDBOX_DIR（这是项目副本，可以直接改）。",
-      "expected_output": "验证 gate 默认化与机械外派。实施默认每里程碑派 coder-plus；数据迁移属不可逆/高爆炸半径里程碑，其 gate 必须外派独立 critic-gate（或按契约注入派遣的只读门禁代理），不由 agent 亲自担任；gate PASS 后由 agent 原子提交。",
-      "files": [],
+      "eval_name": "micro-irreversible-gate-external",
+      "prompt": "micro-note 的笔记存储从 JSON 迁移到 SQLite：迁移现有 store.json 数据，命令层切换到新存储，旧 JSON 保留只读兼容。不用问我，全部做完再汇报。",
+      "expected_output": "验证 gate 默认化与不可逆外派/B+ 缓解降级分支（micro 规模）。实施默认派 coder-plus；存储迁移属不可逆/高爆炸半径里程碑，其 gate 默认外派独立 critic-gate；B+ 缓解降级例外——计划显式声明缓解措施 + critic-strict 计划审查确认缓解设计成立 + 缓解前提编码为节点验收标准并随 gate 验证（静态前提经 scout 取证或已编码为可验证验收条目）三件套齐全时，可由编排者兼任 gate；gate PASS 后 agent 原子提交，未要求 push 不 push。fixture 靶子：store.json 种子数据迁移正确性与旧文件只读兼容是隐藏正确性风险的主要来源。",
       "assertions": [
-        "with_skill：里程碑节点由 coder-plus（或按契约注入派遣的编排型执行代理）实施",
-        "with_skill：数据迁移里程碑的忠实度审查由独立 critic-gate（或按契约注入派遣的只读门禁代理）执行，而非 agent 亲自 gate（不可逆操作机械外派）",
-        "with_skill：gate PASS 后由 agent 原子提交；未要求 push 则无 push",
-        "两种配置：迁移正确——SQLite 存储生效、旧 JSON 保留只读兼容、watchlist 功能正常、pytest 全绿（程序化核验）",
-        "without_skill：直接实施并自验，无独立门禁环节"
+        "with_skill：存储迁移里程碑由 coder-plus（或按 subagents/coder-plus.md 契约注入派遣的编排型执行代理）实施",
+        "with_skill：存储迁移属不可逆/高爆炸半径里程碑，其 gate 满足其一：a) 外派独立 critic-gate（或按契约注入派遣的只读门禁代理，transcript 取证 subagent_type=critic-gate）；b) B+ 缓解降级三件套——计划显式声明缓解措施 + critic-strict 计划审查确认缓解设计成立 + 缓解前提编码为节点验收标准并随 gate 验证（静态前提经 scout 取证或已编码为可验证验收条目），逐环在 transcript 取证。两者皆无则 FAIL",
+        "with_skill：gate PASS 后 agent 原子提交（Conventional Commits），未要求 push 则无 push",
+        "任务本体完成——SQLite 存储生效且 store.json 既有数据迁移正确（程序化核验：条数与内容一致）、旧 store.json 保留只读兼容、add/list/rm 功能正常、pytest 全绿"
       ]
     },
     {
       "id": 24,
-      "eval_name": "coder-plus-deviation-contract",
-      "prompt": "peony 的 watchlist 过滤条件目前是硬编码的三段 if。帮我参数化：M1 把过滤逻辑抽成可组合的谓词结构，对外行为完全不变，pytest 全绿；M2 加 --filter 参数暴露给 CLI 并同步 llm-help.md。不用问我，全部做完再汇报。项目在 SANDBOX_DIR（这是项目副本，可以直接改）。",
-      "expected_output": "验证 coder-plus 派遣契约的注入与偏差知情裁决。M1 的实现方式有自由度（谓词结构的具体形态），派遣指令应包含偏差上报要求（实现偏离节点文本须记入 DEVIATIONS）与不创建提交约束；实施者返回 DEVIATIONS 时，agent 以节点验收标准裁决（良性偏差 + 验收满足 + 如实上报 = 可 PASS），而非机械要求回滚。",
+      "eval_name": "gospec-plan-consumption",
+      "prompt": "micro-note 是一个极简笔记 CLI（SANDBOX_DIR，项目副本，可以直接改）。仓库里已有一份通过审查的实施计划（路径 plan.md，go-spec 分层格式：决策层 / Draft Plan / 里程碑节点）。推进实施计划、分派好 gate：完成各里程碑节点、派遣执行代理，gate 后原子提交，全部完成再汇报。不用问我。",
+      "expected_output": "验证 yes-subagents 消费 go-spec 分层计划的合理性（executor 冒烟）。编排者不重写计划，按节点消费：不为已过审计划重跑全文 critic-strict（走薄计划声明，若再核验 payload 仅限 Decision/Draft 切片）；节点标注（执行形态/性质标记/gate 方式）由编排者按性质轴规则从里程碑下 Task 固有风险的并集推导补全并物化进派遣契约，Task 不独立成派遣节点；里程碑节点派 coder-plus（契约注入，实施者零 commit）；不可逆节点 gate 按性质轴处置（外派或 B+ 缓解降级三件套）；gate PASS 后原子提交；收尾 pruner→scout。fixture 靶子与 E3 同源（store.json 种子迁移保真）。",
       "files": [],
       "assertions": [
-        "with_skill：派遣 coder-plus（或按契约注入派遣的编排型执行代理）的指令中包含偏差上报要求与不创建提交约束（DEVIATIONS 上报、工作区留给 orchestrator 提交）",
-        "with_skill：实施者返回含 DEVIATIONS 的结果时，agent 以节点验收标准裁决偏差（良性偏差可 PASS），未机械要求回滚或重做",
-        "with_skill：coder-plus 会话内无 git commit；里程碑提交由 agent 完成",
-        "两种配置：任务本体完成——过滤逻辑参数化且对外行为不变、--filter 参数可用（程序化核验）、pytest 全绿"
+        "with_skill：读取给定计划并按节点消费，未重写或另立计划（transcript 取证：计划全文只读引用，无新计划产出）",
+        "with_skill：不为已过审计划重跑全文 critic-strict（走薄计划声明；若再核验，payload 仅限 Decision/Draft 切片）",
+        "with_skill：节点标注补全——派遣契约含执行形态、性质标记、gate 方式，性质标记为里程碑级（其下 Task 固有风险的并集），且 Task 未独立成派遣节点（transcript 取证）",
+        "with_skill：里程碑节点由 coder-plus（或按契约注入派遣的编排型执行代理）实施，实施者零 commit、DEVIATIONS 上报",
+        "with_skill：不可逆节点 gate 处置合规——外派 critic-gate，或 B+ 缓解降级三件套齐全（声明 + strict 确认 + 缓解前提随 gate 验证）",
+        "with_skill：gate PASS 后原子提交（Conventional Commits），未要求 push 则无 push",
+        "任务本体完成——SQLite 存储生效、store.json 迁移正确、旧 JSON 只读兼容、pytest 全绿（程序化核验，复用 E3 探针）"
       ]
     }
   ]

@@ -1,10 +1,12 @@
-# yes-subagents
+<div align="center">
+  <h1>Yes! Subagents</h1>
+  <p><strong>强化子代理分派能力, 维护主会话中的上下文健康</strong></p>
+  <p>单次的高消耗换取长久的稳定</p>
+</div>
 
-子代理编排技能（Agent Skill）：帮助 agent 主动判断场景、组合子代理、安排多轮迭代与门禁检查。
+健康的上下文空间, 可以让 Agent 能持久地推进工作计划, 稍微缓解记忆幻觉和长文腐化. 其中不可避免地增加 token 开销, 粗略计算下来是 2 倍左右, 需要酌情使用.
 
-详细设计说明见 `skill/SKILL.md` 与项目根的 `AGENTS.md`。
-
-## 安装
+## 如何添加
 
 ```bash
 git clone https://github.com/xxYaOho/skill-subagents.git
@@ -13,9 +15,10 @@ mkdir -p ~/.agents/skills
 ln -s "$(pwd)/skill" ~/.agents/skills/yes-subagents
 ```
 
-技能本体在 `skill/` 目录（含 `SKILL.md` 与 `subagents/`）。`~/.agents/skills/` 是跨工具通用目录：Claude Code、Kimi Code、Codex、DeepSeek Harness 都会扫描；用符号链接挂载，仓库更新后即时生效。
+- 技能本体在 `skill/` 目录（含 `SKILL.md` 与 `subagents/`）。
+- `~/.agents/skills/` 是跨工具通用目录：Claude Code、Kimi Code、Codex、DeepSeek Harness 都会扫描；用符号链接挂载，仓库更新后即时生效。
 
-各 CLI 的技能目录一览：
+如果使用的是其它工作, 则自行调整 Symlink 的位置
 
 | CLI | 用户级技能目录 |
 | --- | --- |
@@ -23,8 +26,6 @@ ln -s "$(pwd)/skill" ~/.agents/skills/yes-subagents
 | Kimi Code CLI | `~/.kimi-code/skills/`（随 `$KIMI_CODE_HOME` 移动），也读 `~/.agents/skills/` |
 | Codex CLI | `~/.agents/skills/`（跨工具通用目录；项目级为 `<repo>/.agents/skills/`） |
 | DeepSeek Harness | `~/.agents/skills/`（作为共享 Agent 技能根加载） |
-
-如需隔离到某个 CLI，换对应目录即可，例如 Claude Code：
 
 ```bash
 mkdir -p ~/.claude/skills
@@ -39,8 +40,20 @@ ln -s "$(pwd)/skill" ~/.claude/skills/yes-subagents
 ls ~/.agents/skills/yes-subagents/SKILL.md
 ```
 
-## 卸载
+## 移除
 
 ```bash
 unlink ~/.agents/skills/yes-subagents   # 只删链接，不影响仓库
 ```
+
+## 子代理们
+
+| 名称            | ID            | 描述  |
+|---------------|---------------|-----|
+| Critic Strict | critic-strict |     |
+| Critic Gate   | critic-gate   |     |
+|               |               |     |
+|               |               |     |
+|               |               |     |
+|               |               |     |
+|               |               |     |
