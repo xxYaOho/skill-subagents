@@ -10,3 +10,4 @@
 - [Coding workflow 重构决策](coding-workflow-redesign-decisions.md) | 2k | coding 消费已批准计划并编排施工：薄计划由 Orchestrator 自执行，厚计划按 Milestone 交给 coder-plus，配合计划级持久 gate 与单次 Pruner 收尾 | subagent, orchestration, coding, workflow
 - [Coding 评估 R1 观察与 R2 边界](coding-eval-r1-r2-observation.md) | 1k | R1 证明主要流程合规但暴露质量探针与 oracle 缺口；R2 先修评估包并暂缓 skill 变更 | subagent, orchestration, coding, evaluation, eval
 - [增量复审契约的 fresh-agent 盲区](delta-review-fresh-agent-blindspot.md) | 2k | 增量复审只在修复为局部编辑时安全；结构性返工下产出只对 payload 成立的 PASS，须以骨架字段触发器机械回落全量重审 | review, orchestration, contract
+- [Strict 飞轮四轮上限与生命周期重启决策](strict-flywheel-four-round-decision.md) | 1k | 一次生命周期为 1 次初审加最多 4 次修正；停滞早停，耗尽后须用户授权且工件有实质变化才用 fresh reviewer 重启 | review, orchestration, strict, flywheel

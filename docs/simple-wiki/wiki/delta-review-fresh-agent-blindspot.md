@@ -2,8 +2,8 @@
 title: 增量复审契约的 fresh-agent 盲区
 type: pitfall
 created: 2026-09-04
-updated: 2026-09-04
-sources: [raw/delta-review-fresh-agent-blindspot.md]
+updated: 2026-09-09
+sources: [raw/delta-review-fresh-agent-blindspot.md, raw/strict-flywheel-four-round-decision-2026-09-09.md]
 topic: 复审契约
 tags: [review, orchestration, delta-review, contract, context-bloat]
 status: current
@@ -12,7 +12,7 @@ context: 2
 
 # 增量复审契约的 fresh-agent 盲区
 
-> 踩坑（2026-09）：多轮审查的「增量契约」（round>1 只发上轮缺陷清单 + 对应修复 + 声明受影响节，禁止重发全文）在修复为局部编辑时以极低成本保持审查质量；一旦修复重构了骨架，它产出「只对 payload 成立、对整体不成立」的 PASS。四轮实证（R1 v0.5.1–R4 v0.5.4，同一任务）同轮验证了文本级场景的收益与结构性返工场景的失效。（[增量复审契约的 fresh-agent 盲区](../raw/delta-review-fresh-agent-blindspot.md)）
+> 踩坑（2026-09）：多轮审查的「增量契约」（round>1 只发上轮缺陷清单 + 对应修复 + 声明受影响节，禁止重发全文）在修复为局部编辑时以极低成本保持审查质量；一旦修复重构了骨架，它产出「只对 payload 成立、对整体不成立」的 PASS。四轮实证（R1 v0.5.1–R4 v0.5.4，同一任务）同轮验证了文本级场景的收益与结构性返工场景的失效。后续决策将结构性修正改为同一生命周期内复用 reviewer、仅在受控重启时使用 fresh 全量审查。（[增量复审契约的 fresh-agent 盲区](../raw/delta-review-fresh-agent-blindspot.md)；[Strict 飞轮四轮上限与生命周期重启决策](../raw/strict-flywheel-four-round-decision-2026-09-09.md)）
 
 ## 命题：契约安全性的隐含前提
 
@@ -47,13 +47,13 @@ context: 2
 
 ## fresh 的语义分层
 
-「Fresh Agent」原则的本义是独立于作者（不 self-critique），不约束「同一审查者跨轮次复用」。同会话续派不违反该原则，但引入两个原则管不到的风险：基线分叉（前述）与**锚定偏差**（已 PASS 过一轮的审查者推翻自己前轮裁决的倾向；n=1 无观测样本，方向上与分叉同源）。设计多轮审查时，「独立于作者」与「每轮独立视野」是两个必须分开处置的维度。
+「Fresh Agent」原则的本义是独立于作者（不 self-critique），不要求同一生命周期的每轮都更换审查者。结构性修正虽然切换为 `FULL`，仍复用该生命周期的 reviewer；只有生命周期耗尽或早停后经用户授权重启，才使用 fresh reviewer。这样把「独立于作者」「生命周期连续性」与「重启时的新视角」分开处置。
 
 ## 修复方向：机械分支，不依赖申报自觉
 
-1. **骨架字段触发器**：增量 payload 必填声明——本轮修复是否变更任一骨架字段（以计划书为例：节点边界 / 执行形态标注 / 可动文件清单 / 验收标准的归属节点 / 交付物构成）。任一为是 → 回落 fresh 派遣 + 全量重审；全否 → 维持增量。判据用工件中本就显式的字段，不依赖主观判断「是否结构性」。
-2. **禁令条件化**：「never resend the full artifact」改为——非结构性修复禁止重发全文；结构性变更**必须**重发全文并 fresh 派遣。
-3. 成本核算：只有罕见轮付全价。四轮实证中 3/4 的审查轮次为文本级修复，常见路径的节省全部保留。
+1. **骨架字段触发器**：增量 payload 必填声明——本轮修复是否变更任一骨架字段（以计划书为例：节点边界 / 执行形态标注 / 可动文件清单 / 验收标准的归属节点 / 交付物构成）。任一为是 → 在同一生命周期内切换 `FULL`，并传入完整修订工件；全否 → 维持 `DELTA`。判据用工件中本就显式的字段，不依赖主观判断「是否结构性」。
+2. **生命周期边界**：一轮生命周期最多 1 次初审 + 4 次修正；同一实质 FATAL 两轮未缩小，或两轮持续引入新 FATAL 时提前停止。耗尽或早停后不自动换 reviewer，必须取得用户授权；重启才使用 fresh reviewer、Round 1、`FULL`，并附完整当前工件、FATAL 台账与前轮摘要。
+3. 成本核算：常见路径保留 `DELTA` 的节省，只有受控重启才支付 fresh 全量审查成本；原稿不变时禁止换 reviewer 寻求 PASS。
 
 ## 适用边界
 

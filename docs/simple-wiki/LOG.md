@@ -8,6 +8,7 @@
 > ~~~
 
 ## 2026-09-09
+- ingest | 复审契约 | 编译 Strict 飞轮四轮上限、停滞早停与受控 fresh 重启决策
 - ingest | Coding workflow | 编译薄计划执行纠正：薄计划由 Orchestrator 自执行，不人为拆 Task 或派 coder；厚计划仍按 Milestone 交给 coder-plus
 - ingest | Coding workflow | 编译 coding-ledger-run-1 R1 观察与 R2 边界：区分流程合规、完成质量与评估包缺口，R2 先修包并暂缓 skill 变更
 

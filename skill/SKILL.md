@@ -3,7 +3,7 @@ name: yes-subagents
 description: >
   遇到长任务、多工作单元的代码工程、需要消费已批准实施计划或整体治理存量仓库，或用户（或技能链）明确提到子代理（subagent）时加载本技能。技能负责组合子代理、选择调度形态、运行验证飞轮，并向用户合并汇报结果。简单一次性请求由 Orchestrator 直接完成，不因加载本技能而强制分派。
 metadata:
-  version: "0.5.4"
+  version: "0.5.5"
 ---
 
 # Yes! Subagents
@@ -58,21 +58,23 @@ Orchestrator，即主会话 agent。
 ```
 Action
   ↓
-Verify or Review  → Fix (max rounds: 6)
+  Verify or Review  → Fix (max correction rounds: 4)
   ↓
 Action Again
   ↻
 ```
 
-`行动 --> 审查 --> 修正 --> 再行动`，飞轮最多修正 6 轮；初始产出、蜂群分批和代理重试不计入修正轮次。
+`行动 --> 审查 --> 修正 --> 再行动`。一次生命周期包含 1 次初始审查和最多 4 次修正审查；初始产出、蜂群分批和代理重试不计入修正轮次。
 
 - 满足预定目标（或 PASS）后停止飞轮，将剩余非阻断问题一并汇报
-- 达到最大轮次时停止飞轮，向用户诚实汇报未完成根因
-- 获得用户许可后，重置次数并重启飞轮
+- 同一实质 FATAL 连续两次修正未缩小，或连续两次修正都在遗留 FATAL 未清除时引入新的 FATAL，提前停止飞轮
+- 达到 4 次修正上限或触发早停时停止飞轮，向用户汇报未收敛根因；不得自行更换 reviewer 或继续审查
+- 只有用户明确授权，且工件发生实质修订、出现新证据或获得用户裁决，才能开启新生命周期
+- 新生命周期必须使用 fresh reviewer，以 Round 1、`FULL` 重新审查，并提供完整当前工件、未解决 FATAL 台账和上一生命周期摘要；原稿不变时禁止换 reviewer 寻求 PASS
 
 > [!IMPORTANT]
 > **避免冗余**
-> Strict `FAIL` 后的局部 FATAL 修正使用 DELTA；结构性修正使用 FULL。`PASS` 后的 MAJOR/MINOR 默认随交付进入后续阶段，不自动复审。具体判据以 `subagents/critic-strict.md` 为准。
+> Strict `FAIL` 后的局部 FATAL 修正使用 DELTA；结构性修正使用 FULL，但两者都仍属于同一审查生命周期并复用原 reviewer。`PASS` 后的 MAJOR/MINOR 默认随交付进入后续阶段，不自动复审。具体判据以 `subagents/critic-strict.md` 为准。
  
 ### 调度
 
