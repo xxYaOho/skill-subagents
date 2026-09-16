@@ -75,6 +75,8 @@ Action Again
 > [!IMPORTANT]
 > **避免冗余**
 > Strict `FAIL` 后的局部 FATAL 修正使用 DELTA；结构性修正使用 FULL，但两者都仍属于同一审查生命周期并复用原 reviewer。`PASS` 后的 MAJOR/MINOR 默认随交付进入后续阶段，不自动复审。具体判据以 `subagents/critic-strict.md` 为准。
+
+Strict 派遣可带 `intensity: low | high | max`，未声明时默认 `high`。选择优先级为：`Human 显式指定 > Orchestrator 基于风险选择 > 默认 high`。仅在风险信号明确时偏离默认档位：局部、可逆、无外部合同、影响面可直接验证且改动机械的工作可用 `low`；不可逆、迁移、安全敏感、跨层合同、恢复代价高或验证不透明的工作使用 `max`；信号混合或无法判断时保持 `high`。强度只改变主动探索范围，不改变 FATAL/MAJOR/MINOR 判级标准。
  
 ### 调度
 
@@ -111,6 +113,8 @@ Action Again
 
 - **Critic Strict**：想法、草案、报告或会被后续决策依赖的结论；计划类产出按对应 workflow 的审查合同执行
 - **Critic Gate**：存在实现忠实度、回归、契约或隐藏正确性风险时进入 gate 审查
+
+Strict 返回 `PASS` 且带有 `MAJOR` 时，Orchestrator 必须建立 MAJOR 台账，至少记录问题、影响范围、责任方、最迟关闭点和状态。下一阶段会直接消费的 MAJOR 必须在消费前关闭；其余 MAJOR 可随施工推进，但最终交付前必须变为 `RESOLVED`（已修正并验证）或 `ACCEPTED`（Human 明确接受并记录理由）。不得静默丢弃。处置若改变目标、范围、结论、节点、依赖、验收、证据集、交付物或外部契约，则按结构性新版本重新进入 `FULL`。
 
 ### 原则：Fresh Agent
 
