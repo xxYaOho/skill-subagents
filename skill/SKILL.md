@@ -1,9 +1,9 @@
 ---
 name: yes-subagents
 description: >
-  遇到长任务、多工作单元的代码工程、需要消费已批准实施计划或整体治理存量仓库，或用户（或技能链）明确提到子代理（subagent）时加载本技能。技能负责组合子代理、选择调度形态、运行验证飞轮，并向用户合并汇报结果。简单一次性请求由 Orchestrator 直接完成，不因加载本技能而强制分派。
+  遇到长任务、多工作单元的代码工程、需要消费已批准实施计划、整体治理存量仓库，或用户明确提到子代理（subagent）时加载本技能；用户明确要求 snapshot、固定当前现场或保留可复现 worktree 时也加载本技能。技能负责组合子代理、选择调度形态、运行验证飞轮，并向用户合并汇报结果。简单一次性请求由 Orchestrator 直接完成，不因加载本技能而强制分派。
 metadata:
-  version: "0.5.5"
+  version: "0.6.0"
 ---
 
 # Yes! Subagents
@@ -135,3 +135,4 @@ Strict 返回 `PASS` 且带有 `MAJOR` 时，Orchestrator 必须建立 MAJOR 台
 
 - `workflow/coding.md`：消费已批准计划并组织编程施工。
 - `workflow/entropy-reducer.md`：审计长期迭代的存量仓库，形成治理决策与计划，再转入施工。
+- `workflow/snapshot.md`：在 Human 主动触发时固定仓库检查点，创建可复现的 Snapshot worktree 并记录现场报告。
