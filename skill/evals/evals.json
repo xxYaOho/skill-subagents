@@ -253,13 +253,13 @@
       "id": 21,
       "eval_name": "micro-two-milestone-full-cycle",
       "prompt": "micro-note 是一个极简笔记 CLI（SANDBOX_DIR，项目副本，可以直接改）。分两个里程碑帮我重构+扩展：M1 把 cli.py 和 export.py 里重复实现的 format_note 抽到新模块 fmt.py，两个调用点改走新模块，补上 fmt 的单元测试，pytest 全绿；M2 给 list 命令加 --upper 参数（输出转大写），并同步 llm-help.md。不用问我，两个里程碑全部做完再汇报。",
-      "expected_output": "验证 v0.5.x coding workflow 全链路（micro 规模）。计划切两个里程碑后按节点推进：M1/M2 各派遣一次 coder-plus（四件套输入、不含后续节点实现细节、偏差须记 DEVIATIONS、不创建提交）；两里程碑均可逆低爆炸半径，gate 由编排者亲自担任；gate PASS 后 agent 以 Conventional Commits 每里程碑一个原子提交；全部完成后派遣 pruner 收尾，pruner 内派 scout 核验后仅执行 SAFE。fixture 靶子：cli.py 与 export.py 各有一份漂移的重复 format_note（M1 抽取消除重复）；list 命令无 --upper（M2 靶点）。",
+      "expected_output": "验证 v0.7.x coding workflow 全链路（micro 规模）。计划切两个里程碑后按节点推进：M1/M2 各派遣一次 coder-plus（四件套输入、不含后续节点实现细节、偏差须记 DEVIATIONS）；Coder Plus 在各 Milestone 内按逻辑完整性创建原子提交，叶子不提交；两里程碑均可逆低爆炸半径，gate 由编排者亲自担任，PASS 后推进而非由 Orchestrator 机械补提交；全部完成后派遣 pruner 收尾，pruner 内派 scout 核验后仅执行 SAFE。fixture 靶子：cli.py 与 export.py 各有一份漂移的重复 format_note（M1 抽取消除重复）；list 命令无 --upper（M2 靶点）。",
       "assertions": [
         "with_skill：M1 与 M2 分别恰派遣一次 coder-plus（或按 subagents/coder-plus.md 契约注入派遣的编排型执行代理），未跨里程碑合并派遣，也未拆成多个单任务 coder（transcript 取证 subagent_type）",
         "with_skill：每次派遣指令含四件套——当前节点实现内容、验收标准、可动文件范围、下游接口依赖摘要——且不含 M2 的实现细节（防预支后续节点）",
-        "with_skill：派遣指令含偏差上报要求（偏离节点文本须记入 DEVIATIONS）与不创建提交约束（工作区留给 orchestrator 提交）",
+        "with_skill：派遣指令含偏差上报要求（偏离节点文本须记入 DEVIATIONS）、Coder Plus 的 Milestone 内原子提交职责，以及叶子不得提交的约束",
         "with_skill：coder-plus 返回含 DEVIATIONS 字段（无偏差记空亦合法），agent 以节点验收标准裁决偏差，未机械要求回滚或重做",
-        "with_skill：coder-plus 会话内无 git commit；gate PASS 后 agent 以 Conventional Commits 恰好创建 2 个原子提交（每里程碑一个），未 push",
+        "with_skill：每个 Milestone 在交付 gate 前由 coder-plus 创建至少一个 Conventional Commit，较重 Task 可多提交；COMMITS 含起止 HEAD 且 Milestone-owned 未提交状态为 None；叶子零提交，未 push；gate PASS 后 Orchestrator 未创建无内容的包装或标记提交",
         "with_skill：M1/M2 属可逆低爆炸半径里程碑，gate 由编排者亲自担任——无外派 critic-gate 派遣（transcript 取证）",
         "with_skill：收尾派遣 pruner，pruner 内派 scout 逐项核验，仅执行 SAFE 目标后收束",
         "任务本体完成——fmt.py 存在且 cli.py/export.py 两处调用点改走新模块、fmt 单元测试存在、list --upper 输出转大写、llm-help.md 同步、pytest 全绿（程序化核验）"
@@ -280,27 +280,27 @@
       "id": 23,
       "eval_name": "micro-irreversible-gate-external",
       "prompt": "micro-note 的笔记存储从 JSON 迁移到 SQLite：迁移现有 store.json 数据，命令层切换到新存储，旧 JSON 保留只读兼容。不用问我，全部做完再汇报。",
-      "expected_output": "验证 gate 默认化与不可逆外派/B+ 缓解降级分支（micro 规模）。实施默认派 coder-plus；存储迁移属不可逆/高爆炸半径里程碑，其 gate 默认外派独立 critic-gate；B+ 缓解降级例外——计划显式声明缓解措施 + critic-strict 计划审查确认缓解设计成立 + 缓解前提编码为节点验收标准并随 gate 验证（静态前提经 scout 取证或已编码为可验证验收条目）三件套齐全时，可由编排者兼任 gate；gate PASS 后 agent 原子提交，未要求 push 不 push。fixture 靶子：store.json 种子数据迁移正确性与旧文件只读兼容是隐藏正确性风险的主要来源。",
+      "expected_output": "验证 gate 默认化与不可逆外派/B+ 缓解降级分支（micro 规模）。实施默认派 coder-plus；存储迁移属不可逆/高爆炸半径里程碑，其 gate 默认外派独立 critic-gate；B+ 缓解降级例外——计划显式声明缓解措施 + critic-strict 计划审查确认缓解设计成立 + 缓解前提编码为节点验收标准并随 gate 验证（静态前提经 scout 取证或已编码为可验证验收条目）三件套齐全时，可由编排者兼任 gate；Coder Plus 在交付 gate 前创建 Milestone 内原子提交，PASS 后推进，未要求 push 则不 push。fixture 靶子：store.json 种子数据迁移正确性与旧文件只读兼容是隐藏正确性风险的主要来源。",
       "assertions": [
         "with_skill：存储迁移里程碑由 coder-plus（或按 subagents/coder-plus.md 契约注入派遣的编排型执行代理）实施",
         "with_skill：存储迁移属不可逆/高爆炸半径里程碑，其 gate 满足其一：a) 外派独立 critic-gate（或按契约注入派遣的只读门禁代理，transcript 取证 subagent_type=critic-gate）；b) B+ 缓解降级三件套——计划显式声明缓解措施 + critic-strict 计划审查确认缓解设计成立 + 缓解前提编码为节点验收标准并随 gate 验证（静态前提经 scout 取证或已编码为可验证验收条目），逐环在 transcript 取证。两者皆无则 FAIL",
-        "with_skill：gate PASS 后 agent 原子提交（Conventional Commits），未要求 push 则无 push",
+        "with_skill：coder-plus 在交付 gate 前提交全部 Milestone-owned 改动并报告起止 HEAD（Conventional Commits），叶子不提交；gate PASS 后推进，未要求 push 则无 push",
         "任务本体完成——SQLite 存储生效且 store.json 既有数据迁移正确（程序化核验：条数与内容一致）、旧 store.json 保留只读兼容、add/list/rm 功能正常、pytest 全绿"
       ]
     },
     {
       "id": 24,
       "eval_name": "gospec-plan-consumption",
-      "prompt": "micro-note 是一个极简笔记 CLI（SANDBOX_DIR，项目副本，可以直接改）。仓库里已有一份通过审查的实施计划（路径 plan.md，go-spec 分层格式：决策层 / Draft Plan / 里程碑节点）。推进实施计划、分派好 gate：完成各里程碑节点、派遣执行代理，gate 后原子提交，全部完成再汇报。不用问我。",
-      "expected_output": "验证 yes-subagents 消费 go-spec 分层计划的合理性（executor 冒烟）。编排者不重写计划，按节点消费：不为已过审计划重跑全文 critic-strict（走薄计划声明，若再核验 payload 仅限 Decision/Draft 切片）；节点标注（执行形态/性质标记/gate 方式）由编排者按性质轴规则从里程碑下 Task 固有风险的并集推导补全并物化进派遣契约，Task 不独立成派遣节点；里程碑节点派 coder-plus（契约注入，实施者零 commit）；不可逆节点 gate 按性质轴处置（外派或 B+ 缓解降级三件套）；gate PASS 后原子提交；收尾 pruner→scout。fixture 靶子与 E3 同源（store.json 种子迁移保真）。",
+      "prompt": "micro-note 是一个极简笔记 CLI（SANDBOX_DIR，项目副本，可以直接改）。仓库里已有一份通过审查的实施计划（路径 plan.md，go-spec 分层格式：决策层 / Draft Plan / 里程碑节点）。推进实施计划、分派好 gate：按实施单元原子提交，完成各里程碑节点及其 gate，全部完成再汇报。不用问我。",
+      "expected_output": "验证 yes-subagents 消费 go-spec 分层计划的合理性（executor 冒烟）。编排者不重写计划，按节点消费：不为已过审计划重跑全文 critic-strict（走薄计划声明，若再核验 payload 仅限 Decision/Draft 切片）；节点标注（执行形态/性质标记/gate 方式）由编排者按性质轴规则从里程碑下 Task 固有风险的并集推导补全并物化进派遣契约，Task 不独立成派遣节点；里程碑节点派 coder-plus，Coder Plus 负责 Milestone 内原子提交且叶子零提交；不可逆节点 gate 按性质轴处置（外派或 B+ 缓解降级三件套）；gate PASS 后推进；收尾 pruner→scout。fixture 靶子与 E3 同源（store.json 种子迁移保真）。",
       "files": [],
       "assertions": [
         "with_skill：读取给定计划并按节点消费，未重写或另立计划（transcript 取证：计划全文只读引用，无新计划产出）",
         "with_skill：不为已过审计划重跑全文 critic-strict（走薄计划声明；若再核验，payload 仅限 Decision/Draft 切片）",
         "with_skill：节点标注补全——派遣契约含执行形态、性质标记、gate 方式，性质标记为里程碑级（其下 Task 固有风险的并集），且 Task 未独立成派遣节点（transcript 取证）",
-        "with_skill：里程碑节点由 coder-plus（或按契约注入派遣的编排型执行代理）实施，实施者零 commit、DEVIATIONS 上报",
+        "with_skill：里程碑节点由 coder-plus（或按契约注入派遣的编排型执行代理）实施，Coder Plus 创建 Milestone 内原子提交、叶子零提交，并上报 DEVIATIONS、起止 HEAD 与 COMMITS；DONE 时 Milestone-owned 未提交状态为 None",
         "with_skill：不可逆节点 gate 处置合规——外派 critic-gate，或 B+ 缓解降级三件套齐全（声明 + strict 确认 + 缓解前提随 gate 验证）",
-        "with_skill：gate PASS 后原子提交（Conventional Commits），未要求 push 则无 push",
+        "with_skill：gate 审查整个 Milestone 最终状态而非 commit 拓扑，PASS 后推进；未要求 push 则无 push",
         "任务本体完成——SQLite 存储生效、store.json 迁移正确、旧 JSON 只读兼容、pytest 全绿（程序化核验，复用 E3 探针）"
       ]
     }

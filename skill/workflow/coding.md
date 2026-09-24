@@ -63,6 +63,9 @@ Strict `PASS` 后，MAJOR/MINOR 作为非阻断事项进入施工。Orchestrator
 - 验收标准；
 - 可动文件范围；
 - 依赖、约束和下游接口承诺。
+- 当前工作区与 Git 策略，包括共享写入、已有脏改动和远程操作限制；未特别声明时按本 workflow 的本地追加提交默认值执行。
+
+派遣前，Orchestrator 记录当前 `HEAD`、staged / unstaged / untracked 状态与已有改动归属，作为 Milestone 的 Git 基线。可动文件内若已有他人改动，施工包必须明确其归属和保留方式；无法证明 Coder Plus 的修改与既有改动可隔离时，不得开工。
 
 施工包使用 `go-spec` 的 `Milestone-<n>.md` 切片或等价内容，并满足 `coder-plus` 的 PRECONDITION。Task 归属于该 Milestone，只由 Coder Plus 消费。
 
@@ -79,12 +82,15 @@ Orchestrator 直接完成全部实施与直接验证，不为分派而拆分工�
 按计划顺序逐个推进 Milestone：
 
 1. 将当前 Milestone 施工包一次性交给 `coder-plus`。
-2. Coder Plus 默认亲自实施；仅在并行、上下文隔离或专门能力收益明确时分派叶子。
-3. 收到 `STATUS: DONE` 后，检查其 DELEGATION、DEVIATIONS、CHANGES 与 VERIFICATION。
-4. 由当前计划的 gate reviewer 核验整个 Milestone。
-5. 只有 `STATUS: PASS` 后，才进入下一 Milestone。
+2. Coder Plus 默认亲自实施；仅在并行、上下文隔离或专门能力收益明确时分派叶子。可写叶子不创建提交，局部结果由 Coder Plus 统一整合。
+3. Coder Plus 对完成且已自验证的逻辑单元创建原子提交，自主决定粒度；Task 是自然边界但不强制与 commit 一一对应。
+4. 收到 `STATUS: DONE` 后，检查其 DELEGATION、DEVIATIONS、CHANGES、COMMITS 与 VERIFICATION，并确认所有 Milestone-owned 改动均已提交、工作区相对开工 Git 基线只保留未变化的既有改动。
+5. 以开工 `HEAD`、交付 `HEAD`、两者间提交和干净的 Milestone-owned 状态作为稳定 gate handoff，由当前计划的 gate reviewer 核验整个 Milestone。
+6. 只有 `STATUS: PASS` 后，才进入下一 Milestone。
 
 Orchestrator 不干预 Coder Plus 的内部 Task 分派，也不为其叶子增加独立 gate。叶子完成只代表局部输入；Milestone 是否完成，以 Coder Plus 的统一验证和计划级 gate 为准。
+
+Coder Plus 若在已有提交后返回 `STATUS: BLOCKED`，必须报告已完成提交、未提交状态和剩余边界；Orchestrator 保留这些恢复点但不得推进下游。事实性输入补齐且 Milestone 基线未变时续用原执行会话；若需要改变目标、范围、验收、设计或节点边界，则按结构性偏差回流 `go-spec`。
 
 ## 5. Gate 生命周期
 
@@ -96,6 +102,8 @@ Orchestrator 不干预 Coder Plus 的内部 Task 分派，也不为其叶子增�
 - 同一 reviewer 只读取当前节点基线、实现结果、验证证据和已接受偏差；不重复 strict，也不重读无关计划层。
 
 gate 对照批准计划当前节点判断：验收是否满足、实现是否忠实、下游契约是否保持、是否引入回归。实现方式可以不同，但必须向 reviewer 如实披露；Coder Plus 通过 DEVIATIONS 记录。
+
+commit 是施工持久化检查点，不是 gate 凭证。gate 审查当前 Milestone 的完整最终状态、验证证据和偏差，不以提交数量或拓扑作为 PASS 条件。`STATUS: DONE` 时若仍有 Milestone-owned staged、unstaged 或 untracked 改动，不得进入 gate。Coder Plus 交付 gate 时冻结受审 `HEAD` 与提交历史；之后若 gate `FAIL`，修复以追加提交进入同一审查生命周期，不改写 reviewer 已见的提交。
 
 `STATUS: FAIL` 时，将阻断项交回原执行者修正；条件允许时延续同一执行会话。修正后仍由同一个 gate reviewer 复核。`STATUS: BLOCKED` 按 `SKILL.md` 的缺失项规则处理，补齐必要证据后复用原 reviewer。
 
@@ -111,9 +119,16 @@ gate 发现下列情况时，不继续局部修补：
 
 ## 6. 提交与计划收尾
 
-子代理不创建提交。节点 gate PASS 后，是否提交以及提交粒度由 Orchestrator 按用户授权和仓库规则决定。
+提交职责按施工层级划分：
 
-全部实施节点 PASS 后，只运行一次 `pruner`，并提供本计划实际触及的文件边界。Pruner 自行派 `scout` 核验清理目标，只执行 `SAFE` 项；完成后直接验证，不再回到 critic-gate。
+- 薄计划由 Orchestrator 自行实施，并按用户授权与仓库规则创建提交。
+- 厚计划由 Coder Plus 创建当前 Milestone 内的原子提交；其叶子不提交。提交只包含该 Milestone 拥有的改动，不得混入用户或其它工作单元的变化。
+- 未特别授权时，Coder Plus 只在当前检出分支创建本地追加提交，不 push、不操作远程、不改写既有历史。更宽或更窄的 Git 权限由施工包显式声明。
+- gate PASS 只表示当前 Milestone 可以推进，不要求 Orchestrator 再创建包装提交或空提交。Orchestrator 只有在自己产生实际改动时才提交。
+
+若工具内置的同名 `coder-plus` 角色禁止创建本地提交，Orchestrator 改用具备完整读写、命令与叶子分派能力的通用代理并注入完整 `subagents/coder-plus.md` 合同。没有满足能力矩阵的代理时返回 `STATUS: BLOCKED`；运行时能力不足不得静默改变本 workflow 的提交职责。
+
+全部实施节点 PASS 后，只运行一次 `pruner`，并提供本计划实际触及的文件边界。Pruner 自行派 `scout` 核验清理目标，只执行 `SAFE` 项；完成后直接验证，不再回到 critic-gate。Pruner 不提交；计划级清理产生的实际改动由 Orchestrator 收口提交。
 
 Pruner 不在每个 Task 或 Milestone 后运行。若计划尚未完整执行，例如评估只观察前一至两个 Milestone，则不触发计划级收尾。
 
@@ -122,7 +137,7 @@ Pruner 不在每个 Task 或 Milestone 后运行。若计划尚未完整执行�
 完成意味着：
 
 - 所有计划节点均已通过同一 gate reviewer；
-- 必要提交已由 Orchestrator 完成；
+- 必要的实现提交与计划级收尾提交已按职责完成；
 - 计划级 Pruner/Scout 收尾已完成；
 - 最终验证覆盖完整交付，而不只是单个叶子或节点。
 

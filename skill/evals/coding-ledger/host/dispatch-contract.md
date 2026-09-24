@@ -53,6 +53,7 @@ Eval Host 保留完整 transcript 供评分，但 Step 2 只接收：
 - 子代理树、每次派遣的角色、任务边界与结果；
 - 每个会话的 input、cache read、output token 与费用；
 - direct verification、strict 与 gate verdict。
+- Milestone 开工/交付 HEAD、本地 commit 的创建会话、SHA、用途与所属 Milestone、交付时 owned worktree 状态，以及是否存在 push 或受审后历史改写。
 
 token 字段缺失时使用 `null` 并说明来源缺失。不得把缺失记为 0，也不得遗漏嵌套叶子。
 

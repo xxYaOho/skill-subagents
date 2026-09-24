@@ -7,6 +7,10 @@
 > - <ingest|lint> | <主题或页面> | <一句话说明>
 > ~~~
 
+## 2026-09-24
+- ingest | Coding workflow | 增量编译 Coder Plus 的 Milestone 内原子提交自治、叶子禁提交及 gate 后推进合同
+- ingest | Coding workflow | 增量编译 Coder Plus gate handoff 稳定性：Git 基线、owned-clean 交付、受审历史冻结及验证边界
+
 ## 2026-09-09
 - ingest | 复审契约 | 编译 Strict 飞轮四轮上限、停滞早停与受控 fresh 重启决策
 - ingest | Coding workflow | 编译薄计划执行纠正：薄计划由 Orchestrator 自执行，不人为拆 Task 或派 coder；厚计划仍按 Milestone 交给 coder-plus

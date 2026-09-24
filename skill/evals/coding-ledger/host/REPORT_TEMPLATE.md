@@ -57,6 +57,7 @@ INVALID case 只描述基础设施或协议原因，不计入后续 PASS 率。
 - Coder Plus 内部执行图：
 - 叶子分派及收益，或选择不分派的理由：
 - 整合与整体验证：
+- Coder Plus 原子提交、起止 HEAD、owned worktree clean 与叶子零提交证据：
 - Orchestrator gate：
 - 业务 verifier：
 
@@ -66,6 +67,7 @@ INVALID case 只描述基础设施或协议原因，不计入后续 PASS 率。
 - Coder Plus 内部执行图：
 - 叶子分派及收益，或选择不分派的理由：
 - 整合与整体验证：
+- Coder Plus 原子提交、起止 HEAD、owned worktree clean 与叶子零提交证据：
 - 与 M1 同一 gate reviewer 的证据：
 - 全计划一次 Pruner/Scout 收尾：
 - 业务 verifier：
@@ -100,6 +102,8 @@ INVALID case 只描述基础设施或协议原因，不计入后续 PASS 率。
 | thick 未扁平直派 Task | | |
 | thick 两节点复用同一 Orchestrator gate | | |
 | Coder Plus 完成整合与 Milestone 统一验证 | | |
+| Coder Plus 提交、起止 HEAD、owned clean、叶子零提交、无 push | | |
+| gate 后受审历史冻结，FAIL 修复仅追加 | | |
 | 每条完整计划只运行一次 Pruner/Scout 收尾 | | |
 
 ## 6. 裁量观察

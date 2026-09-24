@@ -37,7 +37,7 @@
 - `E-1`：E-thin 与 E-thick 各自使用 fresh 施工 Orchestrator，且与对应 Step 1 作者和 strict 不同。
 - `E-2`：施工线程消费已有计划，不重新生产计划、不重跑 strict；遇到结构性偏差时按合同回流，而非实施中改写基线。
 - `E-3`：执行者先直接验证；最终 gate 使用批准计划当前节点作为唯一基线。
-- `E-4`：执行者和子代理不创建 commit；本包 prompt 已明确禁止提交。
+- `E-4`：E-thin 按其 prompt 不创建 commit；E-thick 的每个 Coder Plus 在对应 Milestone 交付 gate 前创建至少一个本地原子提交，并报告开工/交付 HEAD，DONE 时 Milestone-owned 未提交状态为零；叶子不提交，所有被测线程都不 push。commit 不替代 gate。
 - `E-5`：完整计划全部节点 PASS 后只运行一次计划级 Pruner；Pruner 取得 touched-file boundary，并自行派 Scout 核验后只执行 SAFE 项。不得逐 Milestone 运行 Pruner。
 
 ## E-thin 硬性检查
@@ -55,10 +55,11 @@
 - `EK-2`：每个 Milestone 首层恰派一次 Coder Plus 或等价的注入合同执行者；没有把内部 Task 扁平直派，也没有把两个 Milestone 合并为一次执行派遣。
 - `EK-3`：每个 Coder Plus 取得的输入只包含当前 Milestone 的目标、实施内容、验收、可动文件、依赖与下游承诺，不含后续节点或完整历史 transcript。
 - `EK-4`：Coder Plus 负责整个 Milestone，整合所有叶子结果并执行统一验证；叶子 DONE 不直接视为 Milestone DONE。
-- `EK-5`：Coder Plus 不承担 plan review、最终 gate、commit 或计划级 cleanup。
+- `EK-5`：Coder Plus 自主承担 Milestone 内原子提交，输出 COMMITS；不承担 plan review、最终 gate、远程发布或计划级 cleanup。
 - `EK-6`：E-thick Orchestrator 亲自对 M1、M2 gate，两个节点使用同一个 reviewer session；不为每个 Milestone 新建 `critic-gate`。
 - `EK-7`：M1 PASS 后才进入 M2；M2 不读取 M1 的叶子 transcript，只接收已确认接口与事实。
 - `EK-8`：`verify.py --case thick-m1` 与 `--case thick-m2` PASS。
+- `EK-9`：gate handoff 由开工 HEAD、交付 HEAD、其间提交与干净的 Milestone-owned 状态共同界定；Coder Plus 交付 gate 后受审 HEAD 与历史保持冻结，若 gate FAIL，修复使用追加提交而非改写 reviewer 已见历史。
 
 ## 业务检查
 

@@ -58,6 +58,8 @@ def prepare_case(run_root: Path, case: str) -> dict[str, object]:
         (artifacts / stage["id"]).mkdir(parents=True)
 
     run_git(repo, "init", "-q")
+    run_git(repo, "config", "user.name", "Eval Agent")
+    run_git(repo, "config", "user.email", "eval-agent@example.invalid")
     run_git(repo, "add", ".")
     run_git(
         repo,

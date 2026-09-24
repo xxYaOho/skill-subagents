@@ -10,8 +10,9 @@
 2. Step 2 是否在新线程中只消费批准计划与 PASS 凭证，不重复 Step 1。
 3. 薄计划是否由施工 Orchestrator 自己实施，并由独立 `critic-gate` 完成最终 gate。
 4. 厚计划是否按 Milestone 各派一次 `coder-plus`，由同一施工 Orchestrator 持续 gate。
-5. Coder Plus 是否默认自己实施，只在收益明确时分派边界独立的叶子，并统一验证整个 Milestone。
-6. 完成已验证交付所需的全树 token 与费用是多少。
+5. Coder Plus 是否默认自己实施，只在收益明确时分派边界独立且不提交的叶子，并统一整合、原子提交和验证整个 Milestone。
+6. Gate 是否审查 Milestone 最终状态并在 PASS 后推进，而没有把 commit 误作验收凭证。
+7. 完成已验证交付所需的全树 token 与费用是多少。
 
 本包不重新测试 go-spec 的需求发现和 Draft 设计质量，也不做 with-skill/without-skill A/B。
 

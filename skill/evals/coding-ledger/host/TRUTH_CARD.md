@@ -62,5 +62,6 @@
 - strict 的 FAIL 修正属于同一个 Step 1；只把最终 PASS 凭证传给 Step 2。
 - E-thin 与 E-thick 分别 fresh，且不得继承 Step 1 transcript。
 - E-thick-M1 与 E-thick-M2 必须属于同一个施工 Orchestrator 会话。
+- E-thick 的 Coder Plus 在各 Milestone 内创建本地原子提交；其叶子不提交。DONE 时全部 Milestone-owned 改动已提交，并用开工/交付 HEAD 固定 gate handoff；gate 审查最终实现，PASS 只触发推进，不要求 Orchestrator 补一个提交。
 - 完整计划全部节点 PASS 后运行一次计划级 `pruner`；Pruner 按自身合同派 Scout 核验清理目标。不得在每个 Milestone 后重复收尾。
 - Eval Host 不充当被测施工 Orchestrator、strict 或 gate。
