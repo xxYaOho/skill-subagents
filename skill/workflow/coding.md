@@ -21,14 +21,17 @@
 默认输入是一份由 `go-spec` 或等价方法产出的完整计划。开工前确认：
 
 - 目标、范围和验收标准可判定；
+- 计划包含验收合同：每条成功标准对应至少一个可证伪检查，且检查有明确的比较基线；不可机械验证的部分已声明由 Human 验收；
 - 实施单元具有明确边界、依赖和下游接口承诺；
 - 计划作者已经完成 self-review；
 - 计划已经由作者之外的 fresh `critic-strict` 审查并取得 `STATUS: PASS`；
 - 用户已经授权进入实施。
 
+缺少验收合同时，退回计划生产阶段补齐，不在 strict 生命周期内补写。
+
 self-review 只检查完整性、一致性和格式，不替代独立 critique。无论计划薄厚，strict 都由 fresh-agent 承担。
 
-Strict `PASS` 后，MAJOR/MINOR 作为非阻断事项进入施工。Orchestrator 必须随批准计划传递 MAJOR 台账，至少包含问题、影响范围、责任方、最迟关闭点和状态。下一节点会直接消费的 MAJOR 必须在消费前变为 `RESOLVED` 或 `ACCEPTED`；未被下一节点消费的 MAJOR 可以继续随施工推进，但最终交付前必须关闭。批准基线内消化或披露不触发复审，处置若改变目标、范围、结论、节点、依赖、验收、证据集、交付物或外部契约，则作为结构性新版本重新进入 `FULL`。
+Strict `PASS` 后，MAJOR/MINOR 作为非阻断事项进入施工。Orchestrator 必须随批准计划传递 MAJOR 台账，至少包含问题、影响范围、责任方、最迟关闭点和状态。下一节点会直接消费的 MAJOR 必须在消费前变为 `RESOLVED` 或 `ACCEPTED`；未被下一节点消费的 MAJOR 可以继续随施工推进，但最终交付前必须关闭。不影响第一用途且消费时点未到来的 MAJOR 可以直接 `ACCEPTED`；不得以"未来某个条件触发"作为长期 `OPEN` 的理由，也不得为了关闭台账而新增机制。批准基线内消化或披露不触发复审，处置若改变目标、范围、结论、节点、依赖、验收、证据集、交付物或外部契约，则作为结构性新版本重新进入 `FULL`。
 
 缺少计划、计划仍不完整或尚未通过 strict 时，转交 `go-spec` 与用户补齐，不在本 workflow 内临时生产或修补计划。strict 修正轮次遵循 `critic-strict` 的增量输入契约。
 
@@ -84,9 +87,9 @@ Orchestrator 直接完成全部实施与直接验证，不为分派而拆分工�
 1. 将当前 Milestone 施工包一次性交给 `coder-plus`。
 2. Coder Plus 默认亲自实施；仅在并行、上下文隔离或专门能力收益明确时分派叶子。可写叶子不创建提交，局部结果由 Coder Plus 统一整合。
 3. Coder Plus 对完成且已自验证的逻辑单元创建原子提交，自主决定粒度；Task 是自然边界但不强制与 commit 一一对应。
-4. 收到 `STATUS: DONE` 后，检查其 DELEGATION、DEVIATIONS、CHANGES、COMMITS 与 VERIFICATION，并确认所有 Milestone-owned 改动均已提交、工作区相对开工 Git 基线只保留未变化的既有改动。
+4. 收到 `STATUS: DONE` 后，检查其 DELEGATION、DEVIATIONS、CHANGES、COMMITS、VERIFICATION 与可选的 LEARNINGS，并确认所有 Milestone-owned 改动均已提交、工作区相对开工 Git 基线只保留未变化的既有改动。将 LEARNINGS 作为候选事实或认识暂存；没有 LEARNINGS 不构成缺陷。
 5. 以开工 `HEAD`、交付 `HEAD`、两者间提交和干净的 Milestone-owned 状态作为稳定 gate handoff，由当前计划的 gate reviewer 核验整个 Milestone。
-6. 只有 `STATUS: PASS` 后，才进入下一 Milestone。
+6. 只有 `STATUS: PASS` 后，才进入下一 Milestone；后续 Milestone 若提供新证据，Orchestrator 合并、修正或撤销暂存候选。
 
 Orchestrator 不干预 Coder Plus 的内部 Task 分派，也不为其叶子增加独立 gate。叶子完成只代表局部输入；Milestone 是否完成，以 Coder Plus 的统一验证和计划级 gate 为准。
 
@@ -132,6 +135,8 @@ gate 发现下列情况时，不继续局部修补：
 
 Pruner 不在每个 Task 或 Milestone 后运行。若计划尚未完整执行，例如评估只观察前一至两个 Milestone，则不触发计划级收尾。
 
+计划级清理和最终验证完成后，Orchestrator 必须处理本计划的候选 LEARNINGS：合并重复项，补充实现证据，区分已确认事实、待 Human 判断的项目约定和仅适用于本次工作的局部观察。随后主动向 Human 发起简短复盘；每条先给一句话结论，再给一段说明背景、证据与适用范围。没有候选时也明确说明没有新的可复用认识。Human 确认后，才将具有长期复用价值的内容按 `raw -> wiki` 收录 Simple Wiki；未确认、争议或一次性内容不写入 wiki。
+
 ## 7. 交付
 
 完成意味着：
@@ -140,5 +145,6 @@ Pruner 不在每个 Task 或 Milestone 后运行。若计划尚未完整执行�
 - 必要的实现提交与计划级收尾提交已按职责完成；
 - 计划级 Pruner/Scout 收尾已完成；
 - 最终验证覆盖完整交付，而不只是单个叶子或节点。
+- 候选 LEARNINGS 已完成计划级汇总，并已向 Human 发起复盘；Human 确认的可复用内容已收录或明确无需收录。
 
 交付前检查 MAJOR 台账：所有条目必须为 `RESOLVED` 或 `ACCEPTED`。若未关闭条目实际阻断下一步决策或执行，将其升级为 FATAL，停止交付并按 Strict 生命周期处理。向用户汇报最终结果、关键偏差、验证证据、未阻断事项，以及任何未能完成的验证。不要复述子代理过程日志。

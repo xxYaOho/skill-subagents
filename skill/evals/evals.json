@@ -303,6 +303,42 @@
         "with_skill：gate 审查整个 Milestone 最终状态而非 commit 拓扑，PASS 后推进；未要求 push 则无 push",
         "任务本体完成——SQLite 存储生效、store.json 迁移正确、旧 JSON 只读兼容、pytest 全绿（程序化核验，复用 E3 探针）"
       ]
+    },
+    {
+      "id": 25,
+      "eval_name": "strict-anchor-severity",
+      "prompt": "fresh critic-strict 按新契约执行 Round 4 审查：输入 yes-designer v4 草案（857 行）、判级锚（4 条成功标准）与上一轮 R3 台账，输出审查报告与会话记录。",
+      "expected_output": "fresh critic-strict 在判级锚下执行 Round 4 审查：形式完备性缺口不判 FATAL，验收合同缺失（执行层、diff 基线、回归触发）保留 FATAL 资格，每条 FATAL 引用锚，不要求新增机制闭合形式缺口。",
+      "files": [
+        "evals/strict-convergence/fixture/yes-designer-work-loop-v4.md",
+        "evals/strict-convergence/fixture/yes-designer-work-loop-v3-report.md",
+        "evals/strict-convergence/fixture/ANCHOR.md"
+      ],
+      "assertions": [
+        "每条 FATAL 均引用判级锚的成功标准或第一用途（报告或 session 取证）",
+        "形式完备性缺口（hash 标注错误、schema 不一致、措辞/表头语义）未被判为 FATAL",
+        "至少一条验收合同缺失被判为 FATAL：computed/layout 断言无执行层、事故 B 拦截无 diff 基线、跨切片退化无回归触发之一",
+        "修复建议不要求新增机制来闭合形式完备性缺口",
+        "输出包含 STATUS 行与 FATAL/MAJOR/MINOR/UNVERIFIED/ESCALATE 分节"
+      ]
+    },
+    {
+      "id": 26,
+      "eval_name": "lead-triage-correction",
+      "prompt": "fresh Orchestrator 按新 skill 契约处理 strict FAIL：输入 yes-designer v4 草案、R4 报告（1 FATAL / 7 MAJOR）与判级锚，产出 disposition 表、修正方案与会话记录。",
+      "expected_output": "fresh Orchestrator 按新 skill 契约处理 strict FAIL：先分诊后修正；只修真缺陷 FATAL 及其直接辐射，MAJOR carry forward；新增机制声明服务标准；涉及删除/新增验收面或机制的处置归取舍并升级用户。",
+      "files": [
+        "evals/strict-convergence/fixture/yes-designer-work-loop-v4.md",
+        "evals/strict-convergence/fixture/yes-designer-work-loop-v4-report.md",
+        "evals/strict-convergence/fixture/ANCHOR.md"
+      ],
+      "assertions": [
+        "处置表覆盖全部 FATAL 与 MAJOR，且先分诊后修正（有明确处置类型）",
+        "只处理真缺陷 FATAL 及其直接辐射；MAJOR 未被顺手全部修复（carry forward 取证）",
+        "新增机制均声明服务哪条成功标准；无无法声明的机制",
+        "涉及删除或新增验收面/机制、接受风险的处置归取舍并升级用户",
+        "修正方案相对 v4 无显著膨胀（有范围声明或不纳入清单）"
+      ]
     }
   ]
 }
