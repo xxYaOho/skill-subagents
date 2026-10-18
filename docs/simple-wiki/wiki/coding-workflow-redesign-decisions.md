@@ -2,8 +2,8 @@
 title: Coding workflow 重构决策
 type: decision
 created: 2026-09-08
-updated: 2026-09-24
-sources: [raw/coding-workflow-redesign-discussion-2026-09-08.md, raw/coder-plus-milestone-lead-decision-2026-09-08.md, raw/coding-workflow-plan-consumer-implementation-2026-09-08.md, raw/coding-workflow-thin-plan-execution-correction-2026-09-08.md, raw/coder-plus-milestone-commit-autonomy-2026-09-24.md, raw/coder-plus-gate-handoff-stability-2026-09-24.md]
+updated: 2026-09-30
+sources: [raw/coding-workflow-redesign-discussion-2026-09-08.md, raw/coder-plus-milestone-lead-decision-2026-09-08.md, raw/coding-workflow-plan-consumer-implementation-2026-09-08.md, raw/coding-workflow-thin-plan-execution-correction-2026-09-08.md, raw/coder-plus-milestone-commit-autonomy-2026-09-24.md, raw/coder-plus-gate-handoff-stability-2026-09-24.md, raw/coding-workflow-milestone-learnings-retrospective-2026-09-30.md]
 topic: Coding workflow
 tags: [subagent, orchestration, coding, workflow, evaluation]
 status: current
@@ -54,6 +54,8 @@ Orchestrator 在派遣 Milestone 前记录开工 `HEAD`、staged / unstaged / un
 
 Coder Plus 输出必须包含 `DELEGATION`：记录助手、分派收益和整合结果；全部亲自完成时写 `None`。`DECISIONS` 只记录无法从 diff 恢复的非显然取舍。它不负责计划审查、最终 gate 或计划级清理，但拥有当前 Milestone 内的原子提交自治权；提交粒度按逻辑完整性决定，不强制一个 Task 恰好对应一个 commit。较重 Task 可以拆成多个提交，每个提交只能包含当前 Milestone 拥有、已经整合并完成相关自验证的变化。
 
+Coder Plus 可在交付中增加 `LEARNINGS`，反馈可能影响后续判断、值得复用或可能形成项目约定的观察；没有时写 `None`，不得为满足格式制造洞见。每条先给一句话结论，再给背景、证据和适用范围。Orchestrator 在 Milestone 交接时暂存候选，后续有新证据时合并、修正或撤销；候选不影响 `STATUS: DONE` 或 gate 判定。
+
 叶子代理不创建提交。Coder Plus 检查叶子证据与改动、完成整合和相关自验证后统一提交，并在输出中列出其创建的提交和任何剩余未提交变化。`STATUS: DONE` 要求所有 Milestone-owned 改动均已提交，剩余 owned staged / unstaged / untracked 状态为 `None`；已有提交后转为 BLOCKED 时保留这些恢复点，并报告已完成提交、未提交状态和剩余边界。commit 是施工持久化与恢复点，不是 gate 的验收凭证，也不授予默认远程推送职责。此前“Coder Plus 不提交”的合同已由[提交自治决策](../raw/coder-plus-milestone-commit-autonomy-2026-09-24.md)明确取代。
 
 ## 计划级 Gate 与偏差
@@ -69,6 +71,8 @@ gate 审查的是批准基线下整个 Milestone 的最终实现、验证证据�
 旧合同曾规定执行者不创建提交、节点 PASS 后由 Orchestrator 决定是否提交；该规则已被[《Coder Plus Milestone 内提交自治决策》](../raw/coder-plus-milestone-commit-autonomy-2026-09-24.md)取代。Coder Plus 在 gate 前为 Milestone 内施工创建原子提交；gate PASS 后，Orchestrator 推进下一 Milestone 或计划级收尾，不要求再创建包装或标记提交。Orchestrator 只在自己实际产生改动时提交。
 
 共享工作区、历史整理和远程操作策略由 workflow 与派遣上下文明确。Coder Plus 不得把用户或其他工作单元的变化混入提交；运行时内置角色若禁止本合同要求的本地提交能力，应使用可写通用代理注入完整 Coder Plus 合同，不得静默降级。
+
+全部节点通过、计划级清理和最终验证完成后，Orchestrator 主动与 Human 做简短复盘：每条先展示一句话结论，再补一段背景、证据和适用范围。只有 Human 确认且具有长期复用价值的内容才按 `raw -> wiki` 收录；未确认、争议或一次性观察不写入 wiki。
 
 ## 当前验证边界
 

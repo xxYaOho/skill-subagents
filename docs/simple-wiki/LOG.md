@@ -7,6 +7,12 @@
 > - <ingest|lint> | <主题或页面> | <一句话说明>
 > ~~~
 
+## 2026-10-18
+- ingest | 复审契约 | 编译 Plan-Strict 循环收敛决策：判级锚、两类缺口、证据强度、分诊与取舍硬判据、升级条件、修复预算、计划准入；附 yes-designer / plan-loop / 规则验证结论
+
+## 2026-09-30
+- ingest | Coding workflow | 增加 Coder Plus 可选 LEARNINGS、Orchestrator 计划级 Human 复盘与确认后 raw-first 收录闭环
+
 ## 2026-09-24
 - ingest | Coding workflow | 增量编译 Coder Plus 的 Milestone 内原子提交自治、叶子禁提交及 gate 后推进合同
 - ingest | Coding workflow | 增量编译 Coder Plus gate handoff 稳定性：Git 基线、owned-clean 交付、受审历史冻结及验证边界
