@@ -51,5 +51,6 @@
 .sisyphus/
 .agents/skills
 .mcp.json
+.codex/
 yes-subagents-workspace
 .playwright-mcp
