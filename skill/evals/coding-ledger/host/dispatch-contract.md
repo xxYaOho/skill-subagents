@@ -4,7 +4,7 @@
 
 Eval Host 只发送当前阶段 prompt、列入 manifest 的可见工件路径、对应 repo 路径，以及实际可用的技能路径。不要概括隐藏 Truth Card，也不要把观察断言改写进 prompt。
 
-所有阶段使用 fresh 会话，只有 E-thick 自身跨两个 Milestone 持续。被测线程内部是否派遣、续派或自行完成，由当前 yes-subagents 合同决定。
+所有阶段使用 fresh 会话，只有 E-thick Orchestrator 自身跨两个 Milestone 持续。E-thick 内的 Coder Plus 每个 Milestone 都要有独立施工派遣；跨 Milestone 是否 fresh 或 retain 由连续性决策决定，retain 时必须记录理由、保留上下文和新节点边界。被测线程内部是否派遣、续派或自行完成，由当前 yes-subagents 合同决定。
 
 ## Step 1 输入
 

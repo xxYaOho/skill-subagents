@@ -74,6 +74,15 @@ Strict `PASS` 后，MAJOR/MINOR 作为非阻断事项进入施工。Orchestrator
 
 若当前节点依赖上一节点的实际结果，只补充已经确认的接口或事实，不附上上一节点 transcript。
 
+### Milestone 间连续性
+
+Milestone 是独立的施工包、提交边界和 gate 边界，但不自动构成 Coder Plus 的 fresh session 边界。当前 Milestone 通过 gate 后，Orchestrator 必须为下一个 Milestone 做一次连续性决策：
+
+- `fresh`：下一节点可以由已确认的接口、事实和验收摘要交接；创建新的 Coder Plus 会话。
+- `retain`：下一节点明显依赖上一节点积累的大量、难以压缩的运行时调查、设计/宿主经验或其他上下文；在同一 Coder Plus 会话中发送新的 Milestone 施工包。
+
+没有明确的上下文收益时选择 `fresh`。无论选择哪条路径，派遣记录都要写明 `continuity`、选择理由、实际保留的上下文和当前节点的重新设定边界。`retain` 不合并 Milestone，也不把上一节点的完整 transcript 作为当前节点输入；当前目标、验收、可动文件、依赖、Git 基线和 gate handoff 仍按本节点重新建立。
+
 ## 4. 推进施工
 
 ### 薄计划
@@ -89,11 +98,11 @@ Orchestrator 直接完成全部实施与直接验证，不为分派而拆分工�
 3. Coder Plus 对完成且已自验证的逻辑单元创建原子提交，自主决定粒度；Task 是自然边界但不强制与 commit 一一对应。
 4. 收到 `STATUS: DONE` 后，检查其 DELEGATION、DEVIATIONS、CHANGES、COMMITS、VERIFICATION 与可选的 LEARNINGS，并确认所有 Milestone-owned 改动均已提交、工作区相对开工 Git 基线只保留未变化的既有改动。将 LEARNINGS 作为候选事实或认识暂存；没有 LEARNINGS 不构成缺陷。
 5. 以开工 `HEAD`、交付 `HEAD`、两者间提交和干净的 Milestone-owned 状态作为稳定 gate handoff，由当前计划的 gate reviewer 核验整个 Milestone。
-6. 只有 `STATUS: PASS` 后，才进入下一 Milestone；后续 Milestone 若提供新证据，Orchestrator 合并、修正或撤销暂存候选。
+6. 只有 `STATUS: PASS` 后，才进入下一 Milestone；进入前完成一次 `fresh` / `retain` 连续性决策，并按决策创建新的 Coder Plus 会话或在当前会话中发送新的 Milestone 施工包。后续 Milestone 若提供新证据，Orchestrator 合并、修正或撤销暂存候选。
 
 Orchestrator 不干预 Coder Plus 的内部 Task 分派，也不为其叶子增加独立 gate。叶子完成只代表局部输入；Milestone 是否完成，以 Coder Plus 的统一验证和计划级 gate 为准。
 
-Coder Plus 若在已有提交后返回 `STATUS: BLOCKED`，必须报告已完成提交、未提交状态和剩余边界；Orchestrator 保留这些恢复点但不得推进下游。事实性输入补齐且 Milestone 基线未变时续用原执行会话；若需要改变目标、范围、验收、设计或节点边界，则按结构性偏差回流 `go-spec`。
+Coder Plus 若在已有提交后返回 `STATUS: BLOCKED`，必须报告已完成提交、未提交状态和剩余边界；Orchestrator 保留这些恢复点但不得推进下游。事实性输入补齐且当前 Milestone 基线未变时可续用原执行会话；这条续用规则只覆盖当前 Milestone 的修复或补证，不替代进入下一 Milestone 前的 `fresh` / `retain` 决策。若需要改变目标、范围、验收、设计或 Milestone 边界，则按结构性偏差回流 `go-spec`。
 
 ## 5. Gate 生命周期
 

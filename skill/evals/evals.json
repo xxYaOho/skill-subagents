@@ -253,9 +253,9 @@
       "id": 21,
       "eval_name": "micro-two-milestone-full-cycle",
       "prompt": "micro-note 是一个极简笔记 CLI（SANDBOX_DIR，项目副本，可以直接改）。分两个里程碑帮我重构+扩展：M1 把 cli.py 和 export.py 里重复实现的 format_note 抽到新模块 fmt.py，两个调用点改走新模块，补上 fmt 的单元测试，pytest 全绿；M2 给 list 命令加 --upper 参数（输出转大写），并同步 llm-help.md。不用问我，两个里程碑全部做完再汇报。",
-      "expected_output": "验证 v0.7.x coding workflow 全链路（micro 规模）。计划切两个里程碑后按节点推进：M1/M2 各派遣一次 coder-plus（四件套输入、不含后续节点实现细节、偏差须记 DEVIATIONS）；Coder Plus 在各 Milestone 内按逻辑完整性创建原子提交，叶子不提交；两里程碑均可逆低爆炸半径，gate 由编排者亲自担任，PASS 后推进而非由 Orchestrator 机械补提交；全部完成后派遣 pruner 收尾，pruner 内派 scout 核验后仅执行 SAFE。fixture 靶子：cli.py 与 export.py 各有一份漂移的重复 format_note（M1 抽取消除重复）；list 命令无 --upper（M2 靶点）。",
+      "expected_output": "验证 v0.8.x coding workflow 全链路（micro 规模）。计划切两个里程碑后按节点推进：M1/M2 各有一次独立 Milestone coder-plus 派遣（四件套输入、不含后续节点实现细节、偏差须记 DEVIATIONS）；跨 Milestone 可按连续性判断选择 fresh 或 retain，选择 retain 时记录明显的上下文收益与保留范围，不把两个 Milestone 合并为一个边界；Coder Plus 在各 Milestone 内按逻辑完整性创建原子提交，叶子不提交；两里程碑均可逆低爆炸半径，gate 由编排者亲自担任，PASS 后推进而非由 Orchestrator 机械补提交；全部完成后派遣 pruner 收尾，pruner 内派 scout 核验后仅执行 SAFE。fixture 靶子：cli.py 与 export.py 各有一份漂移的重复 format_note（M1 抽取消除重复）；list 命令无 --upper（M2 靶点）。",
       "assertions": [
-        "with_skill：M1 与 M2 分别恰派遣一次 coder-plus（或按 subagents/coder-plus.md 契约注入派遣的编排型执行代理），未跨里程碑合并派遣，也未拆成多个单任务 coder（transcript 取证 subagent_type）",
+        "with_skill：M1 与 M2 分别恰有一次当前 Milestone 的 coder-plus 派遣（或按 subagents/coder-plus.md 契约注入派遣的编排型执行代理），可使用 fresh 会话，也可在同一会话中 retain；若 retain，派遣记录含 continuity、上下文收益理由和保留范围，两个 Milestone 仍有独立施工边界，未拆成多个单任务 coder（transcript 取证 subagent_type）",
         "with_skill：每次派遣指令含四件套——当前节点实现内容、验收标准、可动文件范围、下游接口依赖摘要——且不含 M2 的实现细节（防预支后续节点）",
         "with_skill：派遣指令含偏差上报要求（偏离节点文本须记入 DEVIATIONS）、Coder Plus 的 Milestone 内原子提交职责，以及叶子不得提交的约束",
         "with_skill：coder-plus 返回含 DEVIATIONS 字段（无偏差记空亦合法），agent 以节点验收标准裁决偏差，未机械要求回滚或重做",

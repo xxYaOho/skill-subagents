@@ -3,7 +3,7 @@ name: yes-subagents
 description: >
   遇到长任务、多工作单元的代码工程、需要消费已批准实施计划、整体治理存量仓库，或用户明确提到子代理（subagent）时加载本技能；用户明确要求 snapshot、固定当前现场或保留可复现 worktree 时也加载本技能。技能负责组合子代理、选择调度形态、运行验证飞轮，并向用户合并汇报结果。简单一次性请求由 Orchestrator 直接完成，不因加载本技能而强制分派。
 metadata:
-  version: "0.8.0"
+  version: "0.8.1"
 ---
 
 # Yes! Subagents

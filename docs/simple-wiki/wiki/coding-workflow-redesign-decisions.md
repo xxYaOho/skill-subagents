@@ -38,7 +38,7 @@ self-review 只检查完整性、一致性和格式，不替代独立 critique�
 
 开工必须取得完整计划、作者 self-review、作者之外 fresh `critic-strict` 的 PASS，以及用户的实施授权。施工线程只接收批准计划、PASS 凭证和未阻断事项，不继承计划作者或 strict 的完整 transcript，也不重复计划审查。
 
-计划结构决定实施方式：薄计划只有一条连贯的实施路径，可作为整体直接验收，由 Orchestrator 自行实施，不人为拆成 Task 或派遣 `coder`；厚计划包含 Milestone，Orchestrator 每个 Milestone 只派遣一次 `coder-plus`，不把其内部 Task 扁平直派。风险、迁移、新颖性和验证难度只改变 gate 的核验重点，不替代薄厚计划的结构判断。该薄计划规则取代早先材料中的 Task→coder 映射（[Coding workflow 薄计划执行纠正](../raw/coding-workflow-thin-plan-execution-correction-2026-09-08.md)）。
+计划结构决定实施方式：薄计划只有一条连贯的实施路径，可作为整体直接验收，由 Orchestrator 自行实施，不人为拆成 Task 或派遣 `coder`；厚计划包含 Milestone，Orchestrator 每个 Milestone 只派遣一次 `coder-plus`，不把其内部 Task 扁平直派。Milestone 边界不自动等于 Coder Plus 的 fresh session 边界；当前节点 PASS 后，Orchestrator 依据上下文收益在 `fresh` 与 `retain` 之间做一次明确决策。`retain` 只适用于下一节点明显依赖难以压缩的大量运行时、设计或宿主上下文，并须记录理由、保留范围和新的节点边界；无明显收益时使用 `fresh`。无论选择哪条路径，Milestone 仍保持独立施工包、提交和 gate 边界。风险、迁移、新颖性和验证难度只改变 gate 的核验重点，不替代薄厚计划的结构判断。该薄计划规则取代早先材料中的 Task→coder 映射（[Coding workflow 薄计划执行纠正](../raw/coding-workflow-thin-plan-execution-correction-2026-09-08.md)）。
 
 每次派遣只交付当前节点。Task 的最小施工包包含目标与实施内容、验收标准、可动文件范围、依赖、约束和下游接口承诺；Milestone 使用 `go-spec` 的 `Milestone-<n>.md` 切片或等价内容。后续节点和历史 transcript 不进入执行者上下文。
 

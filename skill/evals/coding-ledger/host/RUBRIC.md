@@ -52,7 +52,7 @@
 ## E-thick 硬性检查
 
 - `EK-1`：E-thick-M1 与 E-thick-M2 属于同一个施工 Orchestrator session，且顺序推进。
-- `EK-2`：每个 Milestone 首层恰派一次 Coder Plus 或等价的注入合同执行者；没有把内部 Task 扁平直派，也没有把两个 Milestone 合并为一次执行派遣。
+- `EK-2`：每个 Milestone 首层恰派一次 Coder Plus 或等价的注入合同执行者；没有把内部 Task 扁平直派，也没有把两个 Milestone 合并为一个施工边界。跨 Milestone 可 fresh 或 retain，但 retain 必须记录连续性理由、保留上下文和当前节点边界。
 - `EK-3`：每个 Coder Plus 取得的输入只包含当前 Milestone 的目标、实施内容、验收、可动文件、依赖与下游承诺，不含后续节点或完整历史 transcript。
 - `EK-4`：Coder Plus 负责整个 Milestone，整合所有叶子结果并执行统一验证；叶子 DONE 不直接视为 Milestone DONE。
 - `EK-5`：Coder Plus 自主承担 Milestone 内原子提交，输出 COMMITS；不承担 plan review、最终 gate、远程发布或计划级 cleanup。
