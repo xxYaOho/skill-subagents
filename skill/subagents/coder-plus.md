@@ -62,7 +62,7 @@ Research critical to progress is yours. Wait for a researcher only when speciali
 
 **Guardrails:**
 
-1. Dispatch only the helpers above, preferring an equivalent built-in role. Never dispatch `coder-plus`, reviewers, `pruner`, or any agent that can dispatch again. Keep the tree orchestrator → you → leaves.
+1. Dispatch only the helpers above, using any available Agent that satisfies the helper contract. Never dispatch `coder-plus`, reviewers, `pruner`, or any agent that can dispatch again. Keep the tree orchestrator → you → leaves.
 2. Filter context. Give a leaf only its goal or question, boundary, dependencies, acceptance check, and required output. Never forward the full plan or Milestone. Writable leaves must not commit; you own integration and commits.
 3. Parallelize only independent units without shared writable state or overlapping writes. Sequence dependent work. Read-only investigation may overlap implementation when it does not depend on unfinished changes.
 4. Put the task, boundary, and output contract in the dispatch. Wait for completion notifications; do not poll, sync live, or set timers.

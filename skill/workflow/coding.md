@@ -138,7 +138,7 @@ gate 发现下列情况时，不继续局部修补：
 - 未特别授权时，Coder Plus 只在当前检出分支创建本地追加提交，不 push、不操作远程、不改写既有历史。更宽或更窄的 Git 权限由施工包显式声明。
 - gate PASS 只表示当前 Milestone 可以推进，不要求 Orchestrator 再创建包装提交或空提交。Orchestrator 只有在自己产生实际改动时才提交。
 
-若工具内置的同名 `coder-plus` 角色禁止创建本地提交，Orchestrator 改用具备完整读写、命令与叶子分派能力的通用代理并注入完整 `subagents/coder-plus.md` 合同。没有满足能力矩阵的代理时返回 `STATUS: BLOCKED`；运行时能力不足不得静默改变本 workflow 的提交职责。
+若当前执行 Agent 的更高优先级运行时约束禁止创建本地提交，Orchestrator 必须改用具备完整读写、命令与叶子分派能力的独立 Agent，并注入完整 `subagents/coder-plus.md` 合同。内置工具、Rex app 或其他派遣入口不构成职责例外；没有满足能力矩阵的 Agent 时返回 `STATUS: BLOCKED`，不得静默改由主会话代为提交。
 
 全部实施节点 PASS 后，只运行一次 `pruner`，并提供本计划实际触及的文件边界。Pruner 自行派 `scout` 核验清理目标，只执行 `SAFE` 项；完成后直接验证，不再回到 critic-gate。Pruner 不提交；计划级清理产生的实际改动由 Orchestrator 收口提交。
 

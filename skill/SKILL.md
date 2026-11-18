@@ -3,7 +3,7 @@ name: yes-subagents
 description: >
   遇到长任务、多工作单元的代码工程、需要消费已批准实施计划、整体治理存量仓库，或用户明确提到子代理（subagent）时加载本技能；用户明确要求 snapshot、固定当前现场或保留可复现 worktree 时也加载本技能。技能负责组合子代理、选择调度形态、运行验证飞轮，并向用户合并汇报结果。简单一次性请求由 Orchestrator 直接完成，不因加载本技能而强制分派。
 metadata:
-  version: "0.8.1"
+  version: "0.8.2"
 ---
 
 # Yes! Subagents
@@ -16,7 +16,7 @@ metadata:
 
 - 检查当前可用的子代理列表。
 - 需要分派时，选择与 `subagents/` 中职责一致的角色。
-- yes-subagents 角色与工具内置角色重叠时，优先使用能够完整履行合同的内置角色；派遣时注入对应 `subagents/<role>.md` 的 PRECONDITION、输出分节和 STATUS 契约。若内置角色的更高优先级限制移除了必需能力，改用具备该角色全部读写、命令与叶子分派能力的通用代理并注入完整合同，不得以同名角色静默降级；没有满足能力矩阵的代理时返回 `STATUS: BLOCKED`。若仅系统级格式冲突，至少保留 STATUS 行。
+- yes-subagents 角色与宿主提供的同名 Agent 重叠时，调用入口不改变角色合同：内置工具、Rex app 或其他宿主都按对应 `subagents/<role>.md` 执行。派遣时注入对应角色的 PRECONDITION、输出分节和 STATUS 契约，并确认当前 Agent 的工具与权限满足合同。若当前 Agent 的更高优先级运行时约束移除了必需能力，改用具备该角色全部读写、命令与叶子分派能力的独立 Agent 并注入完整合同，不得因调用入口不同而静默改变职责；没有满足能力矩阵的 Agent 时返回 `STATUS: BLOCKED`。若仅系统级格式冲突，至少保留 STATUS 行。
 
 ### 编排者
 
